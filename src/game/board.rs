@@ -1,6 +1,7 @@
 use super::bitboard::{Bitboard, is_empty, square_mask};
 use super::constants::promotion_row;
 use super::fen::{SidePieces, START_FEN, format_fen, parse_fen};
+use super::hash::{pieces_key, white_to_move_key};
 use super::moves::Move;
 use super::piece::Piece;
 use super::side::Side;
@@ -15,6 +16,7 @@ pub struct Board {
     white_kings: Bitboard,
     side_to_move: Side,
     no_progress_plies: u8,
+    hash: u64,
 }
 
 impl Board {
@@ -26,19 +28,23 @@ impl Board {
     /// Create a board from a position in PDN FEN, like B:W21,22,K30:B1,2,K5
     pub fn from_fen(fen: &str) -> Result<Self, String> {
         let parsed = parse_fen(fen)?;
-        let board = Self {
+        let mut board = Self {
             black_men: parsed.black.men,
             black_kings: parsed.black.kings,
             white_men: parsed.white.men,
             white_kings: parsed.white.kings,
             side_to_move: parsed.side_to_move,
             no_progress_plies: 0,
+            hash: 0,
         };
 
         // Reject impossible positions
         if !board.is_valid() {
             return Err(format!("'{fen}' is not a valid position"));
         }
+
+        // A new position computes its hash from scratch, after that each move updates it
+        board.hash = board.compute_hash();
 
         Ok(board)
     }
@@ -57,6 +63,27 @@ impl Board {
         };
 
         format_fen(self.side_to_move, &white, &black)
+    }
+
+    /// Return the hash that identifies this position
+    pub fn hash(&self) -> u64 {
+        self.hash
+    }
+
+    /// Compute the position hash from scratch
+    fn compute_hash(&self) -> u64 {
+        // Mix in the key for every piece on its square
+        let mut hash = pieces_key(Piece::BlackMan, self.black_men)
+            ^ pieces_key(Piece::BlackKing, self.black_kings)
+            ^ pieces_key(Piece::WhiteMan, self.white_men)
+            ^ pieces_key(Piece::WhiteKing, self.white_kings);
+
+        // The same pieces with the other side to move is a different position
+        if self.side_to_move == Side::White {
+            hash ^= white_to_move_key();
+        }
+
+        hash
     }
 
     /// Return true if the position follows the basic rules of the board
@@ -180,11 +207,19 @@ impl Board {
         self.switch_side();
 
         debug_assert!(self.is_valid(), "move {mv} left the board invalid");
+        debug_assert_eq!(
+            self.hash,
+            self.compute_hash(),
+            "move {mv} left the hash out of sync"
+        );
     }
 
     /// Pass the turn to the other side
     fn switch_side(&mut self) {
         self.side_to_move = self.side_to_move.opposite();
+
+        // The key is in the hash only while White is to move, so XOR toggles it
+        self.hash ^= white_to_move_key();
     }
 
     /// Reset the 40-move count on progress, otherwise count one more ply
@@ -199,12 +234,24 @@ impl Board {
 
     /// Put the given piece on every square in the mask
     fn place_pieces(&mut self, piece: Piece, mask: Bitboard) {
-        *self.bitboard_mut(piece) |= mask;
+        let bitboard = self.bitboard_mut(piece);
+
+        // Only squares that didn't already hold this piece change the hash
+        let added = mask & !*bitboard;
+        *bitboard |= mask;
+
+        self.hash ^= pieces_key(piece, added);
     }
 
     /// Clear the given piece from every square in the mask
     fn remove_pieces(&mut self, piece: Piece, mask: Bitboard) {
-        *self.bitboard_mut(piece) &= !mask;
+        let bitboard = self.bitboard_mut(piece);
+
+        // Only squares that actually held this piece change the hash
+        let removed = mask & *bitboard;
+        *bitboard &= !mask;
+
+        self.hash ^= pieces_key(piece, removed);
     }
 
     /// Return the bitboard that stores the given piece
@@ -335,5 +382,31 @@ mod tests {
         // Even a king capture counts as progress
         play(&mut board, "18x9");
         assert_eq!(board.no_progress_plies(), 0);
+    }
+
+    #[test]
+    fn same_position_by_different_moves_has_the_same_hash() {
+        let start = "B:WK29:BK1";
+
+        // Black's king goes 1 -> 5 -> 9 in one game and 1 -> 6 -> 9 in the other
+        let mut first = Board::from_fen(start).unwrap();
+        for notation in ["1-5", "29-25", "5-9", "25-22"] {
+            play(&mut first, notation);
+        }
+
+        let mut second = Board::from_fen(start).unwrap();
+        for notation in ["1-6", "29-25", "6-9", "25-22"] {
+            play(&mut second, notation);
+        }
+
+        assert_eq!(first.hash(), second.hash());
+        assert_ne!(first.hash(), Board::from_fen(start).unwrap().hash());
+    }
+
+    #[test]
+    fn side_to_move_changes_the_hash() {
+        let black_to_move = Board::from_fen("B:W21:B1").unwrap();
+        let white_to_move = Board::from_fen("W:W21:B1").unwrap();
+        assert_ne!(black_to_move.hash(), white_to_move.hash());
     }
 }

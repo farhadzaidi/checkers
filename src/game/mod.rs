@@ -3,6 +3,7 @@ mod board;
 mod constants;
 mod direction;
 mod fen;
+mod hash;
 mod movegen;
 mod moves;
 mod piece;
