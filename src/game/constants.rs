@@ -1,6 +1,14 @@
-use super::types::Bitboard;
+use super::bitboard::Bitboard;
+use super::side::Side;
 
-pub const START_BLACK_MEN: Bitboard = 0x0000_0FFF;
-pub const START_BLACK_KINGS: Bitboard = 0;
-pub const START_WHITE_MEN: Bitboard = 0xFFF0_0000;
-pub const START_WHITE_KINGS: Bitboard = 0;
+/// Black men crown on the bottom row, White men on the top row
+pub const BLACK_PROMOTION_ROW: Bitboard = 0xF000_0000;
+pub const WHITE_PROMOTION_ROW: Bitboard = 0x0000_000F;
+
+/// Return the row where the given side's men get crowned
+pub fn promotion_row(side: Side) -> Bitboard {
+    match side {
+        Side::Black => BLACK_PROMOTION_ROW,
+        Side::White => WHITE_PROMOTION_ROW,
+    }
+}

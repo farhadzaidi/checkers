@@ -1,5 +1,26 @@
 use super::direction::Direction;
-use super::types::{Bitboard, Square};
+use super::types::Square;
+
+pub type Bitboard = u32;
+pub const EMPTY_BITBOARD: Bitboard = 0;
+
+/// Return true if the bitboard has no squares set
+pub fn is_empty(bb: Bitboard) -> bool {
+    bb == EMPTY_BITBOARD
+}
+
+/// Return a bitboard with only the given square set
+pub fn square_mask(square: Square) -> Bitboard {
+    debug_assert!(square < 32, "square {square} is off the board");
+    1 << square
+}
+
+/// Return the square of the lowest set bit, which is the square itself for a single-square mask
+pub fn to_square(bb: Bitboard) -> Square {
+    // An empty bitboard has no lowest bit, and would give the invalid square 32
+    debug_assert!(!is_empty(bb), "to_square on an empty bitboard");
+    bb.trailing_zeros() as Square
+}
 
 // Each row has 4 dark squares (one hex digit), counted from the top row.
 // Rows alternate between two shapes:
@@ -20,27 +41,27 @@ const LEFT_ALIGNED_ROWS: Bitboard = 0xF0F0_F0F0;
 const LEFT_EDGE: Bitboard = 0x1010_1010;
 const LEFT_ALIGNED_ROWS_NOT_LEFT_EDGE: Bitboard = LEFT_ALIGNED_ROWS & !LEFT_EDGE;
 
-/// Move every piece in `bb` one step up and to the right
+/// Move every piece one step up and to the right
 fn up_right(bb: Bitboard) -> Bitboard {
     ((bb & RIGHT_ALIGNED_ROWS_NOT_RIGHT_EDGE) >> 3) | ((bb & LEFT_ALIGNED_ROWS) >> 4)
 }
 
-/// Move every piece in `bb` one step up and to the left
+/// Move every piece one step up and to the left
 fn up_left(bb: Bitboard) -> Bitboard {
     ((bb & RIGHT_ALIGNED_ROWS) >> 4) | ((bb & LEFT_ALIGNED_ROWS_NOT_LEFT_EDGE) >> 5)
 }
 
-/// Move every piece in `bb` one step down and to the right
+/// Move every piece one step down and to the right
 fn down_right(bb: Bitboard) -> Bitboard {
     ((bb & RIGHT_ALIGNED_ROWS_NOT_RIGHT_EDGE) << 5) | ((bb & LEFT_ALIGNED_ROWS) << 4)
 }
 
-/// Move every piece in `bb` one step down and to the left
+/// Move every piece one step down and to the left
 fn down_left(bb: Bitboard) -> Bitboard {
     ((bb & RIGHT_ALIGNED_ROWS) << 4) | ((bb & LEFT_ALIGNED_ROWS_NOT_LEFT_EDGE) << 3)
 }
 
-/// Move every piece in `bb` one diagonal step in `direction`
+/// Move every piece one diagonal step in the given direction
 pub fn shift(bb: Bitboard, direction: Direction) -> Bitboard {
     match direction {
         Direction::UpLeft => up_left(bb),
@@ -50,9 +71,91 @@ pub fn shift(bb: Bitboard, direction: Direction) -> Bitboard {
     }
 }
 
-/// Remove the lowest set bit from `bb` and return its square. `bb` must not be empty
+/// Remove the lowest set bit from a non-empty bitboard and return its square
 pub fn pop_lsb(bb: &mut Bitboard) -> Square {
-    let square = bb.trailing_zeros() as Square;
+    debug_assert!(!is_empty(*bb), "pop_lsb on an empty bitboard");
+    let square = to_square(*bb);
     *bb &= *bb - 1;
     square
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const ALL_DIRECTIONS: [(Direction, i32, i32); 4] = [
+        // Direction, then how it changes the row and column on the 8x8 board
+        (Direction::UpLeft, -1, -1),
+        (Direction::UpRight, -1, 1),
+        (Direction::DownLeft, 1, -1),
+        (Direction::DownRight, 1, 1),
+    ];
+
+    /// Return a square's row and column on the full 8x8 board
+    fn row_col(square: Square) -> (i32, i32) {
+        let row = (square / 4) as i32;
+
+        // Right-aligned rows (0, 2, ...) start at column 1, left-aligned rows at column 0
+        let first_col = if row % 2 == 0 { 1 } else { 0 };
+        let col = first_col + (square % 4) as i32 * 2;
+
+        (row, col)
+    }
+
+    #[test]
+    fn every_shift_moves_one_diagonal_step_or_falls_off() {
+        for square in 0..32 {
+            let (row, col) = row_col(square);
+
+            for (direction, row_step, col_step) in ALL_DIRECTIONS {
+                let shifted = shift(square_mask(square), direction);
+                let target_row = row + row_step;
+                let target_col = col + col_step;
+                let on_board = (0..8).contains(&target_row) && (0..8).contains(&target_col);
+
+                if on_board {
+                    // Exactly one piece, on the diagonal neighbour
+                    assert_eq!(shifted.count_ones(), 1, "square {square} {direction:?}");
+                    assert_eq!(
+                        row_col(to_square(shifted)),
+                        (target_row, target_col),
+                        "square {square} {direction:?}"
+                    );
+                } else {
+                    // Off the edge, so the piece disappears instead of wrapping
+                    assert!(is_empty(shifted), "square {square} {direction:?} wrapped");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn shifting_many_pieces_matches_shifting_each_one() {
+        for (direction, _, _) in ALL_DIRECTIONS {
+            // Shift all 32 squares at once, then compare to shifting them one by one
+            let all_at_once = shift(!EMPTY_BITBOARD, direction);
+            let one_by_one = (0..32)
+                .map(|square| shift(square_mask(square), direction))
+                .fold(EMPTY_BITBOARD, |result, shifted| result | shifted);
+
+            assert_eq!(all_at_once, one_by_one, "{direction:?}");
+        }
+    }
+
+    #[test]
+    fn pop_lsb_returns_squares_lowest_first() {
+        let mut bb = square_mask(3) | square_mask(17) | square_mask(30);
+
+        assert_eq!(pop_lsb(&mut bb), 3);
+        assert_eq!(pop_lsb(&mut bb), 17);
+        assert_eq!(pop_lsb(&mut bb), 30);
+        assert!(is_empty(bb));
+    }
+
+    #[test]
+    fn square_mask_and_to_square_round_trip() {
+        for square in 0..32 {
+            assert_eq!(to_square(square_mask(square)), square);
+        }
+    }
 }

@@ -4,3 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+arrayvec = "0.7.8"
+
+# Optimize test builds so perft runs fast, while keeping debug assertions
+# and overflow checks on
+[profile.test]
+opt-level = 3

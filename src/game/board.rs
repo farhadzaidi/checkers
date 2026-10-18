@@ -1,7 +1,10 @@
-use super::constants::{START_BLACK_KINGS, START_BLACK_MEN, START_WHITE_KINGS, START_WHITE_MEN};
+use super::bitboard::{Bitboard, is_empty, square_mask};
+use super::constants::promotion_row;
+use super::fen::{SidePieces, START_FEN, format_fen, parse_fen};
+use super::moves::Move;
 use super::piece::Piece;
 use super::side::Side;
-use super::types::{Bitboard, Square};
+use super::types::Square;
 use std::fmt;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -11,38 +14,91 @@ pub struct Board {
     white_men: Bitboard,
     white_kings: Bitboard,
     side_to_move: Side,
+    no_progress_plies: u8,
 }
 
 impl Board {
     /// Create a board in the starting position, Black to move
-    pub fn new() -> Self {
-        Self {
-            black_men: START_BLACK_MEN,
-            black_kings: START_BLACK_KINGS,
-            white_men: START_WHITE_MEN,
-            white_kings: START_WHITE_KINGS,
-            side_to_move: Side::Black,
-        }
+    pub fn start_position() -> Self {
+        Board::from_fen(START_FEN).expect("the starting position should always parse")
     }
 
-    /// Return the piece on `square`, or None if it's empty
-    pub fn piece_at(&self, square: Square) -> Option<Piece> {
-        let bit: Bitboard = 1 << square;
+    /// Create a board from a position in PDN FEN, like B:W21,22,K30:B1,2,K5
+    pub fn from_fen(fen: &str) -> Result<Self, String> {
+        let parsed = parse_fen(fen)?;
+        let board = Self {
+            black_men: parsed.black.men,
+            black_kings: parsed.black.kings,
+            white_men: parsed.white.men,
+            white_kings: parsed.white.kings,
+            side_to_move: parsed.side_to_move,
+            no_progress_plies: 0,
+        };
 
-        if self.black_men & bit != 0 {
+        // Reject impossible positions
+        if !board.is_valid() {
+            return Err(format!("'{fen}' is not a valid position"));
+        }
+
+        Ok(board)
+    }
+
+    /// Write the position as a PDN FEN string
+    pub fn to_fen(&self) -> String {
+        let white = SidePieces {
+            side: Side::White,
+            men: self.white_men,
+            kings: self.white_kings,
+        };
+        let black = SidePieces {
+            side: Side::Black,
+            men: self.black_men,
+            kings: self.black_kings,
+        };
+
+        format_fen(self.side_to_move, &white, &black)
+    }
+
+    /// Return true if the position follows the basic rules of the board
+    pub fn is_valid(&self) -> bool {
+        // A square holds at most one piece, so the four bitboards can't overlap
+        let piece_count: u32 = [
+            self.black_men,
+            self.black_kings,
+            self.white_men,
+            self.white_kings,
+        ]
+        .iter()
+        .map(|bb| bb.count_ones())
+        .sum();
+        let occupied = !self.empty();
+        let no_overlap = piece_count == occupied.count_ones();
+
+        // A man that reached its promotion row would already be a king
+        let black_crowned = is_empty(self.black_men & promotion_row(Side::Black));
+        let white_crowned = is_empty(self.white_men & promotion_row(Side::White));
+
+        no_overlap && black_crowned && white_crowned
+    }
+
+    /// Return the piece on the given square, or None if it's empty
+    pub fn piece_at(&self, square: Square) -> Option<Piece> {
+        let bit = square_mask(square);
+
+        if !is_empty(self.black_men & bit) {
             Some(Piece::BlackMan)
-        } else if self.black_kings & bit != 0 {
+        } else if !is_empty(self.black_kings & bit) {
             Some(Piece::BlackKing)
-        } else if self.white_men & bit != 0 {
+        } else if !is_empty(self.white_men & bit) {
             Some(Piece::WhiteMan)
-        } else if self.white_kings & bit != 0 {
+        } else if !is_empty(self.white_kings & bit) {
             Some(Piece::WhiteKing)
         } else {
             None
         }
     }
 
-    /// Return `side`'s men
+    /// Return the given side's men
     pub fn men(&self, side: Side) -> Bitboard {
         match side {
             Side::Black => self.black_men,
@@ -50,7 +106,7 @@ impl Board {
         }
     }
 
-    /// Return `side`'s kings
+    /// Return the given side's kings
     pub fn kings(&self, side: Side) -> Bitboard {
         match side {
             Side::Black => self.black_kings,
@@ -58,19 +114,107 @@ impl Board {
         }
     }
 
-    /// Return all of `side`'s pieces, men and kings
+    /// Return all of the given side's pieces, men and kings
     pub fn pieces(&self, side: Side) -> Bitboard {
         self.men(side) | self.kings(side)
     }
 
     /// Return every square with no piece on it
-    pub fn empty_squares(&self) -> Bitboard {
+    pub fn empty(&self) -> Bitboard {
         !(self.pieces(Side::Black) | self.pieces(Side::White))
     }
 
     /// Return the side whose turn it is
     pub fn side_to_move(&self) -> Side {
         self.side_to_move
+    }
+
+    /// Return the plies played since a man moved or a piece was captured
+    pub fn no_progress_plies(&self) -> u8 {
+        self.no_progress_plies
+    }
+
+    /// Apply a legal move and pass the turn to the other side
+    pub fn make_move(&mut self, mv: Move) {
+        let side = self.side_to_move;
+        let them = side.opposite();
+        let from = square_mask(mv.from());
+        let to = square_mask(mv.to());
+        let captures = mv.captures();
+
+        // Catch illegal moves before they corrupt the board
+        debug_assert!(
+            !is_empty(self.pieces(side) & from),
+            "move {mv} starts on a square without one of our pieces"
+        );
+        debug_assert!(
+            !is_empty((self.empty() | from) & to),
+            "move {mv} lands on an occupied square"
+        );
+        debug_assert!(
+            is_empty(captures & !self.pieces(them)),
+            "move {mv} captures a square without one of their pieces"
+        );
+
+        // Figure out which of our pieces is moving
+        let is_man = !is_empty(self.men(side) & from);
+        let piece = if is_man {
+            Piece::man(side)
+        } else {
+            Piece::king(side)
+        };
+
+        // A man that lands on our promotion row gets put down as a king
+        let crowned = is_man && !is_empty(to & promotion_row(side));
+        let placed = if crowned { Piece::king(side) } else { piece };
+
+        // Pick the piece up and put it down on its new square
+        self.remove_pieces(piece, from);
+        self.place_pieces(placed, to);
+
+        // Take every captured piece off the board
+        self.remove_pieces(Piece::man(them), captures);
+        self.remove_pieces(Piece::king(them), captures);
+
+        self.update_progress(is_man, captures);
+        self.switch_side();
+
+        debug_assert!(self.is_valid(), "move {mv} left the board invalid");
+    }
+
+    /// Pass the turn to the other side
+    fn switch_side(&mut self) {
+        self.side_to_move = self.side_to_move.opposite();
+    }
+
+    /// Reset the 40-move count on progress, otherwise count one more ply
+    fn update_progress(&mut self, is_man: bool, captures: Bitboard) {
+        // Progress means a man moved or a piece was captured
+        if is_man || !is_empty(captures) {
+            self.no_progress_plies = 0;
+        } else {
+            self.no_progress_plies += 1;
+        }
+    }
+
+    /// Put the given piece on every square in the mask
+    fn place_pieces(&mut self, piece: Piece, mask: Bitboard) {
+        *self.bitboard_mut(piece) |= mask;
+    }
+
+    /// Clear the given piece from every square in the mask
+    fn remove_pieces(&mut self, piece: Piece, mask: Bitboard) {
+        *self.bitboard_mut(piece) &= !mask;
+    }
+
+    /// Return the bitboard that stores the given piece
+    fn bitboard_mut(&mut self, piece: Piece) -> &mut Bitboard {
+        match piece {
+            Piece::BlackMan => &mut self.black_men,
+            Piece::BlackKing => &mut self.black_kings,
+            Piece::WhiteMan => &mut self.white_men,
+            Piece::WhiteKing => &mut self.white_kings,
+        }
     }
 }
 
@@ -113,5 +257,83 @@ impl fmt::Display for Board {
         }
 
         write!(f, "{:?} to move", self.side_to_move)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::generate_moves;
+
+    /// Play the legal move with the given notation, like 9-13 or 22x31
+    fn play(board: &mut Board, notation: &str) {
+        let mv = generate_moves(board)
+            .into_iter()
+            .find(|mv| mv.to_string() == notation)
+            .unwrap_or_else(|| panic!("{notation} is not legal in {}", board.to_fen()));
+        board.make_move(mv);
+    }
+
+    /// Play a move from the given position and return the position after it
+    fn after(fen: &str, notation: &str) -> String {
+        let mut board = Board::from_fen(fen).unwrap();
+        play(&mut board, notation);
+        board.to_fen()
+    }
+
+    #[test]
+    fn simple_step_moves_the_man_and_passes_the_turn() {
+        assert_eq!(
+            after(START_FEN, "9-13"),
+            "W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,10,11,12,13"
+        );
+    }
+
+    #[test]
+    fn capture_removes_the_jumped_piece() {
+        assert_eq!(after("B:W14:B9", "9x18"), "W:W:B18");
+    }
+
+    #[test]
+    fn multi_jump_removes_every_jumped_piece() {
+        assert_eq!(after("B:W14,22:B9", "9x25"), "W:W:B25");
+    }
+
+    #[test]
+    fn man_is_crowned_on_the_promotion_row() {
+        // By a capture, and by a simple step
+        assert_eq!(after("B:W26:B22", "22x31"), "W:W:BK31");
+        assert_eq!(after("B:W:B27", "27-32"), "W:W:BK32");
+    }
+
+    #[test]
+    fn king_stays_a_king() {
+        assert_eq!(after("B:W:BK18", "18-14"), "W:W:BK14");
+    }
+
+    #[test]
+    fn king_moves_count_toward_the_forty_move_rule() {
+        let mut board = Board::from_fen("B:WK29:B1,K18").unwrap();
+
+        play(&mut board, "18-14");
+        assert_eq!(board.no_progress_plies(), 1);
+        play(&mut board, "29-25");
+        assert_eq!(board.no_progress_plies(), 2);
+
+        // A man move is progress and resets the count
+        play(&mut board, "1-5");
+        assert_eq!(board.no_progress_plies(), 0);
+    }
+
+    #[test]
+    fn a_capture_resets_the_forty_move_count() {
+        let mut board = Board::from_fen("W:WK29,14:BK18").unwrap();
+
+        play(&mut board, "29-25");
+        assert_eq!(board.no_progress_plies(), 1);
+
+        // Even a king capture counts as progress
+        play(&mut board, "18x9");
+        assert_eq!(board.no_progress_plies(), 0);
     }
 }
