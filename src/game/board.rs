@@ -1,11 +1,9 @@
-use super::bitboard::{Bitboard, is_empty, square_mask};
-use super::constants::promotion_row;
-use super::fen::{SidePieces, START_FEN, format_fen, parse_fen};
-use super::hash::{pieces_key, white_to_move_key};
+use super::bitboard::{Bitboard, Square, is_empty, square_mask};
+use super::fen::{START_FEN, SidePieces, format_fen, parse_fen};
+use super::hash::{PositionHash, pieces_key, white_to_move_key};
 use super::moves::Move;
 use super::piece::Piece;
 use super::side::Side;
-use super::types::Square;
 use std::fmt;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -15,8 +13,8 @@ pub struct Board {
     white_men: Bitboard,
     white_kings: Bitboard,
     side_to_move: Side,
-    no_progress_plies: u8,
-    hash: u64,
+    plies_since_progress: u8,
+    hash: PositionHash,
 }
 
 impl Board {
@@ -34,7 +32,7 @@ impl Board {
             white_men: parsed.white.men,
             white_kings: parsed.white.kings,
             side_to_move: parsed.side_to_move,
-            no_progress_plies: 0,
+            plies_since_progress: 0,
             hash: 0,
         };
 
@@ -66,12 +64,12 @@ impl Board {
     }
 
     /// Return the hash that identifies this position
-    pub fn hash(&self) -> u64 {
+    pub fn hash(&self) -> PositionHash {
         self.hash
     }
 
     /// Compute the position hash from scratch
-    fn compute_hash(&self) -> u64 {
+    fn compute_hash(&self) -> PositionHash {
         // Mix in the key for every piece on its square
         let mut hash = pieces_key(Piece::BlackMan, self.black_men)
             ^ pieces_key(Piece::BlackKing, self.black_kings)
@@ -102,8 +100,8 @@ impl Board {
         let no_overlap = piece_count == occupied.count_ones();
 
         // A man that reached its promotion row would already be a king
-        let black_crowned = is_empty(self.black_men & promotion_row(Side::Black));
-        let white_crowned = is_empty(self.white_men & promotion_row(Side::White));
+        let black_crowned = is_empty(self.black_men & Side::Black.promotion_row());
+        let white_crowned = is_empty(self.white_men & Side::White.promotion_row());
 
         no_overlap && black_crowned && white_crowned
     }
@@ -157,8 +155,8 @@ impl Board {
     }
 
     /// Return the plies played since a man moved or a piece was captured
-    pub fn no_progress_plies(&self) -> u8 {
-        self.no_progress_plies
+    pub fn plies_since_progress(&self) -> u8 {
+        self.plies_since_progress
     }
 
     /// Apply a legal move and pass the turn to the other side
@@ -192,7 +190,7 @@ impl Board {
         };
 
         // A man that lands on our promotion row gets put down as a king
-        let crowned = is_man && !is_empty(to & promotion_row(side));
+        let crowned = is_man && !is_empty(to & side.promotion_row());
         let placed = if crowned { Piece::king(side) } else { piece };
 
         // Pick the piece up and put it down on its new square
@@ -226,9 +224,9 @@ impl Board {
     fn update_progress(&mut self, is_man: bool, captures: Bitboard) {
         // Progress means a man moved or a piece was captured
         if is_man || !is_empty(captures) {
-            self.no_progress_plies = 0;
+            self.plies_since_progress = 0;
         } else {
-            self.no_progress_plies += 1;
+            self.plies_since_progress += 1;
         }
     }
 
@@ -363,13 +361,13 @@ mod tests {
         let mut board = Board::from_fen("B:WK29:B1,K18").unwrap();
 
         play(&mut board, "18-14");
-        assert_eq!(board.no_progress_plies(), 1);
+        assert_eq!(board.plies_since_progress(), 1);
         play(&mut board, "29-25");
-        assert_eq!(board.no_progress_plies(), 2);
+        assert_eq!(board.plies_since_progress(), 2);
 
         // A man move is progress and resets the count
         play(&mut board, "1-5");
-        assert_eq!(board.no_progress_plies(), 0);
+        assert_eq!(board.plies_since_progress(), 0);
     }
 
     #[test]
@@ -377,11 +375,11 @@ mod tests {
         let mut board = Board::from_fen("W:WK29,14:BK18").unwrap();
 
         play(&mut board, "29-25");
-        assert_eq!(board.no_progress_plies(), 1);
+        assert_eq!(board.plies_since_progress(), 1);
 
         // Even a king capture counts as progress
         play(&mut board, "18x9");
-        assert_eq!(board.no_progress_plies(), 0);
+        assert_eq!(board.plies_since_progress(), 0);
     }
 
     #[test]

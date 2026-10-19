@@ -1,5 +1,4 @@
-use super::bitboard::{Bitboard, is_empty};
-use super::types::Square;
+use super::bitboard::{Bitboard, Square, is_empty};
 use arrayvec::ArrayVec;
 use std::fmt;
 

@@ -1,6 +1,5 @@
-use super::bitboard::{Bitboard, is_empty, pop_lsb};
+use super::bitboard::{Bitboard, Square, is_empty, pop_lsb};
 use super::piece::Piece;
-use super::types::Square;
 use rand::rngs::StdRng;
 use rand::{RngExt, SeedableRng};
 use std::sync::LazyLock;
@@ -13,23 +12,26 @@ use std::sync::LazyLock;
 //     3. XOR undoes itself, so moving a piece just XORs its old key out and
 //         its new key in, instead of recomputing the whole hash
 
+/// A 64-bit fingerprint that identifies a position
+pub type PositionHash = u64;
+
 const NUM_PIECE_TYPES: usize = 4;
 const NUM_SQUARES: usize = 32;
 
 /// Fixed seed, so every run uses the same keys
-const KEY_SEED: u64 = 0xC0DE_C0FF_EE12_34;
+const KEY_SEED: u64 = 0x00C0_DEC0_FFEE_1234;
 
 /// Every random key the hash uses
 struct HashKeys {
-    piece_square: [[u64; NUM_SQUARES]; NUM_PIECE_TYPES],
-    white_to_move: u64,
+    piece_square: [[PositionHash; NUM_SQUARES]; NUM_PIECE_TYPES],
+    white_to_move: PositionHash,
 }
 
 /// The keys, generated the first time any of them is used
 static KEYS: LazyLock<HashKeys> = LazyLock::new(generate_keys);
 
 /// Return the combined key for the given piece on every square in the mask
-pub fn pieces_key(piece: Piece, mask: Bitboard) -> u64 {
+pub fn pieces_key(piece: Piece, mask: Bitboard) -> PositionHash {
     let mut key = 0;
 
     let mut remaining = mask;
@@ -42,12 +44,12 @@ pub fn pieces_key(piece: Piece, mask: Bitboard) -> u64 {
 }
 
 /// Return the key for the given piece on the given square
-fn piece_square_key(piece: Piece, square: Square) -> u64 {
+fn piece_square_key(piece: Piece, square: Square) -> PositionHash {
     KEYS.piece_square[piece as usize][square as usize]
 }
 
 /// Return the key mixed into the hash when it's White's turn
-pub fn white_to_move_key() -> u64 {
+pub fn white_to_move_key() -> PositionHash {
     KEYS.white_to_move
 }
 

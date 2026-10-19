@@ -1,9 +1,9 @@
-use super::bitboard::{Bitboard, EMPTY_BITBOARD, is_empty, pop_lsb, shift, square_mask, to_square};
+use super::bitboard::{
+    Bitboard, EMPTY_BITBOARD, Square, is_empty, pop_lsb, shift, square_mask, to_square,
+};
 use super::board::Board;
-use super::constants::promotion_row;
 use super::direction::{Direction, DirectionPair, KING_DIRECTIONS, forward};
 use super::moves::{Move, MoveList};
-use super::types::Square;
 
 /// Snapshot of one position for a single move generation
 struct MoveGenerator {
@@ -14,6 +14,18 @@ struct MoveGenerator {
     forward_directions: DirectionPair,
     backward_directions: DirectionPair,
     promotion_row: Bitboard,
+}
+
+/// What stays the same while following one jumper's paths
+struct JumpContext<'a> {
+    // Square the jumper started on, which every move from this search starts from
+    origin: Square,
+    // Borrowed from the generator or the king directions, so the search can't outlive them
+    directions: &'a [Direction],
+    // Landing here ends the move: the promotion row for men, nothing for kings
+    stop_row: Bitboard,
+    // Empty squares, counting the jumper's own starting square
+    empty: Bitboard,
 }
 
 impl MoveGenerator {
@@ -29,7 +41,7 @@ impl MoveGenerator {
             empty: board.empty(),
             forward_directions: forward(side),
             backward_directions: forward(side.opposite()),
-            promotion_row: promotion_row(side),
+            promotion_row: side.promotion_row(),
         }
     }
 
@@ -81,25 +93,20 @@ impl MoveGenerator {
                 (&KING_DIRECTIONS, EMPTY_BITBOARD)
             };
 
-            self.jump_search(
-                search_empty,
-                jumper,
-                stop_row,
+            let context = JumpContext {
+                origin: jumper,
                 directions,
-                jumper_mask,
-                EMPTY_BITBOARD,
-                moves,
-            );
+                stop_row,
+                empty: search_empty,
+            };
+            self.jump_search(&context, jumper_mask, EMPTY_BITBOARD, moves);
         }
     }
 
     /// Push one move for every complete jump path from the current square
     fn jump_search(
         &self,
-        search_empty: Bitboard,
-        origin: Square,
-        stop_row: Bitboard,
-        directions: &[Direction],
+        context: &JumpContext,
         current: Bitboard,
         captured: Bitboard,
         moves: &mut MoveList,
@@ -120,13 +127,13 @@ impl MoveGenerator {
         // push one move from the origin to here with every capture along the way.
 
         let mut can_continue_jumping = false;
-        for &direction in directions {
+        for &direction in context.directions {
             let potential_capture = shift(current, direction) & self.them & !captured;
             if is_empty(potential_capture) {
                 continue;
             }
 
-            let landing = shift(potential_capture, direction) & search_empty;
+            let landing = shift(potential_capture, direction) & context.empty;
             if is_empty(landing) {
                 continue;
             }
@@ -135,21 +142,13 @@ impl MoveGenerator {
             can_continue_jumping = true;
 
             // Stop here if a man lands on a promotion row
-            if !is_empty(landing & stop_row) {
-                let mv = Move::new(origin, to_square(landing), captured | potential_capture);
+            if !is_empty(landing & context.stop_row) {
+                let mv = Move::new(context.origin, to_square(landing), captured | potential_capture);
                 moves.push(mv);
                 continue;
             }
 
-            self.jump_search(
-                search_empty,
-                origin,
-                stop_row,
-                directions,
-                landing,
-                captured | potential_capture,
-                moves,
-            );
+            self.jump_search(context, landing, captured | potential_capture, moves);
         }
 
         // We hit a dead end so we can push the move here
@@ -157,7 +156,7 @@ impl MoveGenerator {
             // Every jumper has at least one jump, so a finished path always captured something
             debug_assert!(!is_empty(captured), "jump path ended without a capture");
 
-            let mv = Move::new(origin, to_square(current), captured);
+            let mv = Move::new(context.origin, to_square(current), captured);
             moves.push(mv);
         }
     }

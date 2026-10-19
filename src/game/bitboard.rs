@@ -1,8 +1,11 @@
 use super::direction::Direction;
-use super::types::Square;
 
+/// One bit per dark square, bit 0 is square 1 in notation
 pub type Bitboard = u32;
 pub const EMPTY_BITBOARD: Bitboard = 0;
+
+/// A dark square's bit index, from 0 to 31
+pub type Square = u8;
 
 /// Return true if the bitboard has no squares set
 pub fn is_empty(bb: Bitboard) -> bool {

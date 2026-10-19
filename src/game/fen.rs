@@ -1,6 +1,5 @@
-use super::bitboard::{Bitboard, EMPTY_BITBOARD, is_empty, pop_lsb, square_mask};
+use super::bitboard::{Bitboard, EMPTY_BITBOARD, Square, is_empty, pop_lsb, square_mask};
 use super::side::Side;
-use super::types::Square;
 
 // Positions are written in PDN's FEN format, three fields split by colons:
 //     1. Side to move: B or W
