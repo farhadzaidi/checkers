@@ -21,7 +21,7 @@ pub fn perft(board: &Board, depth: u32) -> u64 {
         child.make_move(mv);
         nodes += perft(&child, depth - 1);
     }
-    
+
     nodes
 }
 

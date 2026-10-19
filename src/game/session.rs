@@ -9,6 +9,7 @@ use super::outcome::{GameOutcome, game_outcome};
 pub struct GameSession {
     current: usize, // Index of the position on the board right now.
     positions: Vec<Board>,
+    played: Vec<Move>, // played[i] leads from positions[i] to positions[i + 1]
 }
 
 impl GameSession {
@@ -22,6 +23,7 @@ impl GameSession {
         Self {
             current: 0,
             positions: vec![board],
+            played: Vec::new(),
         }
     }
 
@@ -58,8 +60,15 @@ impl GameSession {
 
         // Playing after an undo starts a new branch, so the old redo positions go
         self.positions.truncate(self.current + 1);
+        self.played.truncate(self.current);
         self.positions.push(next);
+        self.played.push(mv);
         self.current += 1;
+    }
+
+    /// Return the move that led to the current position, or None at the start
+    pub fn last_move(&self) -> Option<Move> {
+        self.current.checked_sub(1).map(|index| self.played[index])
     }
 
     /// Return true if there's an earlier position to go back to
@@ -188,6 +197,26 @@ mod tests {
         session.undo();
         session.redo();
         assert!(fen(&session).contains("W17,"));
+    }
+
+    #[test]
+    fn last_move_follows_undo_and_redo() {
+        let mut session = GameSession::new();
+        assert_eq!(session.last_move(), None);
+
+        play(&mut session, "9-13");
+        play(&mut session, "22-18");
+        assert_eq!(session.last_move().unwrap().to_string(), "22-18");
+
+        session.undo();
+        assert_eq!(session.last_move().unwrap().to_string(), "9-13");
+        session.undo();
+        assert_eq!(session.last_move(), None);
+
+        // A new branch replaces the undone moves
+        session.redo();
+        play(&mut session, "21-17");
+        assert_eq!(session.last_move().unwrap().to_string(), "21-17");
     }
 
     #[test]

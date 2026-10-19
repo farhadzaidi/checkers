@@ -21,7 +21,10 @@ impl Move {
         debug_assert!(from < 32 && to < 32, "move {from}->{to} is off the board");
 
         // Only a capture can end where it started (a king looping back)
-        debug_assert!(from != to || !is_empty(captures), "a simple step must change squares");
+        debug_assert!(
+            from != to || !is_empty(captures),
+            "a simple step must change squares"
+        );
 
         Self { from, to, captures }
     }
@@ -40,6 +43,11 @@ impl Move {
     pub fn captures(&self) -> Bitboard {
         self.captures
     }
+
+    /// Return true if this move jumps over at least one piece
+    pub fn is_capture(&self) -> bool {
+        !is_empty(self.captures)
+    }
 }
 
 impl fmt::Display for Move {
@@ -50,7 +58,7 @@ impl fmt::Display for Move {
         let to = self.to + 1;
 
         // Captures use an x, simple steps use a dash
-        let separator = if is_empty(self.captures) { '-' } else { 'x' };
+        let separator = if self.is_capture() { 'x' } else { '-' };
         write!(f, "{from}{separator}{to}")
     }
 }

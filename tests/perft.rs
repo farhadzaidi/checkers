@@ -27,7 +27,11 @@ fn check_start_position(depths: std::ops::RangeInclusive<u32>) {
 
     for depth in depths {
         let expected = START_POSITION_PERFT[depth as usize - 1];
-        assert_eq!(perft(&board, depth), expected, "perft({depth}) from the start");
+        assert_eq!(
+            perft(&board, depth),
+            expected,
+            "perft({depth}) from the start"
+        );
     }
 }
 

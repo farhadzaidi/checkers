@@ -144,6 +144,11 @@ impl Board {
         self.men(side) | self.kings(side)
     }
 
+    /// Return true if the given side has any pieces left
+    pub fn has_pieces(&self, side: Side) -> bool {
+        !is_empty(self.pieces(side))
+    }
+
     /// Return every square with no piece on it
     pub fn empty(&self) -> Bitboard {
         !(self.pieces(Side::Black) | self.pieces(Side::White))

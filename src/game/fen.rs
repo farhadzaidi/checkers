@@ -13,8 +13,7 @@ use super::side::Side;
 //     Black: men on 1 and 2, king on 5
 
 /// The standard starting position, Black to move
-pub const START_FEN: &str =
-    "B:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12";
+pub const START_FEN: &str = "B:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12";
 
 /// The side to move and pieces read from a FEN string, before they become a board
 pub struct ParsedPosition {
@@ -36,7 +35,10 @@ pub fn parse_fen(fen: &str) -> Result<ParsedPosition, String> {
     //     B:W21,22,K30:B1,2,K5 -> "B", "W21,22,K30", "B1,2,K5"
     let fields: Vec<&str> = fen.trim().split(':').collect();
     if fields.len() != 3 {
-        return Err(format!("expected 3 fields split by ':', found {}", fields.len()));
+        return Err(format!(
+            "expected 3 fields split by ':', found {}",
+            fields.len()
+        ));
     }
 
     let side_to_move = parse_side(fields[0])?;
@@ -184,7 +186,9 @@ mod tests {
         // Black on squares 1-12, White on 21-32, no kings, Black to move
         assert_eq!(board.men(Side::Black), 0x0000_0FFF);
         assert_eq!(board.men(Side::White), 0xFFF0_0000);
-        assert!(is_empty(board.kings(Side::Black) | board.kings(Side::White)));
+        assert!(is_empty(
+            board.kings(Side::Black) | board.kings(Side::White)
+        ));
         assert_eq!(board.side_to_move(), Side::Black);
     }
 

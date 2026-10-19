@@ -72,7 +72,10 @@ impl MoveGenerator {
             result |= jumpers(self.our_kings, direction);
         }
 
-        debug_assert!(is_empty(result & !self.us), "found a jumper that isn't ours");
+        debug_assert!(
+            is_empty(result & !self.us),
+            "found a jumper that isn't ours"
+        );
 
         result
     }
@@ -143,7 +146,11 @@ impl MoveGenerator {
 
             // Stop here if a man lands on a promotion row
             if !is_empty(landing & context.stop_row) {
-                let mv = Move::new(context.origin, to_square(landing), captured | potential_capture);
+                let mv = Move::new(
+                    context.origin,
+                    to_square(landing),
+                    captured | potential_capture,
+                );
                 moves.push(mv);
                 continue;
             }
@@ -198,7 +205,9 @@ pub fn generate_moves(board: &Board) -> MoveList {
 
     // Captures are mandatory, so either every move captures or none do
     debug_assert!(
-        moves.iter().all(|mv| is_empty(mv.captures()) == is_empty(jumpers)),
+        moves
+            .iter()
+            .all(|mv| is_empty(mv.captures()) == is_empty(jumpers)),
         "mixed captures and quiet moves in one move list"
     );
 
@@ -251,7 +260,10 @@ mod tests {
 
     #[test]
     fn kings_move_in_all_four_directions() {
-        assert_eq!(legal_moves("B:W:BK18"), ["18-14", "18-15", "18-22", "18-23"]);
+        assert_eq!(
+            legal_moves("B:W:BK18"),
+            ["18-14", "18-15", "18-22", "18-23"]
+        );
     }
 
     #[test]
