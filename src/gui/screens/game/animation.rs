@@ -1,13 +1,13 @@
 use super::board::{self, BoardGeometry};
 use super::screen::GameScreen;
-use crate::game::{Board, Move, Piece, Square};
+use crate::game::{Board, Move, MovePath, Piece, Square};
 use crate::gui::assets::Sprites;
 use crate::gui::settings::Settings;
 use eframe::egui::{self, Color32, Painter, Pos2, Rect, Vec2};
 use std::f32::consts::TAU;
 
-/// How long a played move takes to slide into place, in seconds
-const SLIDE_SECONDS: f64 = 0.18;
+/// How long each hop of a sliding piece takes, in seconds
+const SLIDE_SECONDS_PER_HOP: f64 = 0.18;
 
 /// How long an illegal move is shown for, in seconds
 const REJECT_SECONDS: f64 = 0.45;
@@ -19,14 +19,17 @@ const SHAKE_DISTANCE: f32 = 0.08;
 /// Red flashed over the square an illegal drop landed on, fading out
 const REJECT_TINT: Color32 = Color32::from_rgba_unmultiplied_const(230, 40, 40, 150);
 
-/// A move sliding into place: the piece glides to its square, and the pieces it took fade out
+/// A piece sliding along its route, one hop at a time. For a played move, the pieces it took fade out
 pub struct Slide {
-    pub mv: Move,
     // The piece as it was before moving, so a man crowned by the move becomes a king as it lands
     piece: Piece,
-    captured: Vec<(Square, Piece)>,
-    // Where the piece was let go, when it was dragged there, instead of its starting square
+    start: Square,
+    // Where the piece was let go, when it was dragged there, instead of its start square
     dropped_at: Option<Pos2>,
+    landings: MovePath,
+    captured: Vec<(Square, Piece)>,
+    // Where a played move put the piece, left empty while it slides there. None for a hop that isn't played yet
+    pub lands_on: Option<Square>,
     // Set on the first frame that draws it
     started: Option<f64>,
 }
@@ -40,27 +43,58 @@ pub struct Rejection {
 }
 
 impl GameScreen {
-    /// Start animating the move that just led away from the before position
-    pub(super) fn start_slide(&mut self, before: &Board, dropped_at: Option<Pos2>) {
-        let Some(mv) = self.session.last_move() else {
-            return;
-        };
+    /// Slide a move that was just played from the before position: from the start square (or the drop point)
+    /// over the given landings, with the pieces it took fading out
+    pub(super) fn slide_played_move(
+        &mut self,
+        before: &Board,
+        mv: Move,
+        start: Square,
+        landings: MovePath,
+        dropped_at: Option<Pos2>,
+    ) {
+        debug_assert!(!landings.is_empty(), "a slide needs somewhere to land");
         let Some(piece) = before.piece_at(mv.from()) else {
             return;
         };
 
-        // Captured pieces are the ones that were there before and are gone now, besides the mover
-        let after = self.session.current_position();
-        let captured = (0..32)
-            .filter(|&square| square != mv.from() && after.piece_at(square).is_none())
+        // The move knows which squares it captured; the position before it says what stood there
+        let captured = mv
+            .captured_squares()
+            .into_iter()
             .filter_map(|square| Some((square, before.piece_at(square)?)))
             .collect();
 
         self.slide = Some(Slide {
-            mv,
             piece,
-            captured,
+            start,
             dropped_at,
+            landings,
+            captured,
+            lands_on: Some(mv.to()),
+            started: None,
+        });
+    }
+
+    /// Slide the selected piece over hops of a capture that isn't finished yet
+    pub(super) fn slide_hops(
+        &mut self,
+        start: Square,
+        landings: MovePath,
+        dropped_at: Option<Pos2>,
+    ) {
+        debug_assert!(!landings.is_empty(), "a slide needs somewhere to land");
+        let Some(piece) = self.selected_piece() else {
+            return;
+        };
+
+        self.slide = Some(Slide {
+            piece,
+            start,
+            dropped_at,
+            landings,
+            captured: Vec::new(),
+            lands_on: None,
             started: None,
         });
     }
@@ -78,7 +112,8 @@ impl GameScreen {
     pub(super) fn advance_slide(&mut self, ui: &egui::Ui, now: f64) -> Option<f32> {
         let slide = self.slide.as_mut()?;
         let started = *slide.started.get_or_insert(now);
-        let progress = progress(ui, started, now, SLIDE_SECONDS);
+        let seconds = SLIDE_SECONDS_PER_HOP * slide.landings.len() as f64;
+        let progress = progress(ui, started, now, seconds);
         if progress.is_none() {
             self.slide = None;
         }
@@ -95,7 +130,7 @@ impl GameScreen {
         progress
     }
 
-    /// Draw the sliding move: the taken pieces fade out while the mover glides from its start to its square
+    /// Draw the sliding piece partway along its route, with the taken pieces fading out as it goes
     pub(super) fn draw_slide(
         &self,
         painter: &Painter,
@@ -113,11 +148,24 @@ impl GameScreen {
             board::draw_piece(painter, rect, piece, 1.0 - eased, sprites, settings);
         }
 
+        // The points the piece passes through: its start, then the middle of each square it lands on
         let start = slide
             .dropped_at
-            .unwrap_or_else(|| geometry.square_rect(slide.mv.from()).center());
-        let end = geometry.square_rect(slide.mv.to()).center();
-        let center = start.lerp(end, eased);
+            .unwrap_or_else(|| geometry.square_rect(slide.start).center());
+        let mut points = vec![start];
+        points.extend(
+            slide
+                .landings
+                .iter()
+                .map(|&square| geometry.square_rect(square).center()),
+        );
+
+        // Split the progress across the hops: with 2 hops, 0.75 is halfway through the second
+        let hops = slide.landings.len();
+        let along = eased * hops as f32;
+        let hop = (along as usize).min(hops - 1);
+        let center = points[hop].lerp(points[hop + 1], along - hop as f32);
+
         let rect = Rect::from_center_size(center, Vec2::splat(geometry.square_size()));
         board::draw_piece(painter, rect, slide.piece, 1.0, sprites, settings);
     }

@@ -1,21 +1,21 @@
 mod bitboard;
 mod board;
 mod direction;
-mod fen;
 mod hash;
 mod movegen;
 mod moves;
 mod outcome;
+mod pdn;
 mod piece;
 mod session;
 mod side;
 
-pub use bitboard::Square;
+pub use bitboard::{Square, row_and_col, square_at};
 pub use board::Board;
 pub use hash::PositionHash;
-pub use movegen::generate_moves;
-pub use moves::{Move, MoveList};
-pub use outcome::{DrawReason, GameOutcome, game_outcome};
+pub use movegen::{generate_moves, move_path};
+pub use moves::{Move, MoveList, MovePath};
+pub use outcome::{DrawReason, GameOutcome, WinReason, game_outcome};
 pub use piece::Piece;
 pub use session::GameSession;
 pub use side::Side;

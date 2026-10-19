@@ -1,7 +1,7 @@
 use super::animation::{Rejection, Slide};
 use super::board::{self, BoardGeometry};
 use super::side_panel::{PANEL_MARGIN, SIDE_PANEL_WIDTH};
-use crate::game::{GameSession, Move, MoveList, Side, Square};
+use crate::game::{GameSession, Move, MovePath, Piece, Side, Square};
 use crate::gui::assets::{Overlay, Sprites};
 use crate::gui::screens::Navigation;
 use crate::gui::settings::Settings;
@@ -19,7 +19,9 @@ pub struct GameScreen {
     pub(super) bottom_side: Side,
     // The square of the piece the player picked, whose moves are showing
     pub(super) selected: Option<Square>,
-    // The square of the piece being dragged, which follows the pointer instead
+    // Squares the selected piece has hopped to in a capture that isn't finished yet. Only shown, not played
+    pub(super) hops: MovePath,
+    // The square the dragged piece was picked up from. It follows the pointer instead
     pub(super) dragging: Option<Square>,
     pub(super) rejection: Option<Rejection>,
     pub(super) slide: Option<Slide>,
@@ -36,6 +38,7 @@ impl GameScreen {
             session,
             bottom_side,
             selected: None,
+            hops: MovePath::new(),
             dragging: None,
             rejection: None,
             slide: None,
@@ -73,32 +76,56 @@ impl GameScreen {
         self.bottom_side = self.bottom_side.opposite();
     }
 
-    /// Take back the last move, if there is one
+    /// Return true if there's something to take back: a hop of the capture in progress, or a played move
+    pub(super) fn can_undo(&self) -> bool {
+        self.is_mid_capture() || self.session.can_undo()
+    }
+
+    /// Take back the last hop of a capture in progress, or else the last move.
+    /// Hops are only shown, never played, so stepping one back leaves the game alone
     pub(super) fn undo(&mut self) {
-        if self.session.can_undo() {
+        if self.is_mid_capture() {
+            self.step_back_hop();
+        } else if self.session.can_undo() {
             self.session.undo();
             self.clear_interaction();
         }
     }
 
-    /// Replay the last undone move, if there is one, sliding it in like a fresh move
+    /// Return true if there's an undone move to replay. Not during a capture, which redo would throw away
+    pub(super) fn can_redo(&self) -> bool {
+        !self.is_mid_capture() && self.session.can_redo()
+    }
+
+    /// Replay the last undone move, if there is one, sliding it along its route like a fresh move
     pub(super) fn redo(&mut self) {
-        if self.session.can_redo() {
-            let before = self.session.current_position();
-            self.session.redo();
-            self.clear_interaction();
-            self.start_slide(&before, None);
+        if !self.can_redo() {
+            return;
+        }
+        let before = self.session.current_position();
+        self.session.redo();
+        self.clear_interaction();
+
+        if let (Some(mv), Some(route)) = (self.session.last_move(), self.session.last_move_path()) {
+            self.slide_played_move(&before, mv, mv.from(), route, None);
         }
     }
 
-    /// Play a move and slide it into place, from the drop point if it was dragged there.
+    /// Play a move, sliding the piece from where it stands over the hops still to go.
     /// If it ends the game, the popup shows once it lands
-    pub(super) fn play(&mut self, mv: Move, dropped_at: Option<Pos2>) {
+    pub(super) fn play(
+        &mut self,
+        mv: Move,
+        start: Square,
+        landings: MovePath,
+        dropped_at: Option<Pos2>,
+    ) {
         let before = self.session.current_position();
         self.session.play(mv);
         self.selected = None;
+        self.hops.clear();
         self.result_pending = self.session.outcome().is_some();
-        self.start_slide(&before, dropped_at);
+        self.slide_played_move(&before, mv, start, landings, dropped_at);
     }
 
     /// Return true if the game over popup should show: a move just ended the game, and it has landed
@@ -106,9 +133,10 @@ impl GameScreen {
         self.result_pending && self.slide.is_none() && self.session.outcome().is_some()
     }
 
-    /// Forget the selection, drag, animations and popup, which belonged to the position before
+    /// Forget the selection, hops, drag, animations and popup, which belonged to the position before
     fn clear_interaction(&mut self) {
         self.selected = None;
+        self.hops.clear();
         self.dragging = None;
         self.rejection = None;
         self.slide = None;
@@ -117,7 +145,7 @@ impl GameScreen {
 
     /// Return true if the piece on this square has a legal move
     pub(super) fn can_move(&self, square: Square) -> bool {
-        self.session.moves().iter().any(|mv| mv.from() == square)
+        !self.session.moves_from(square).is_empty()
     }
 
     /// Return true if the square holds a piece of the side to move that has no legal move
@@ -127,23 +155,6 @@ impl GameScreen {
             .piece_at(square)
             .is_some_and(|piece| piece.side() == position.side_to_move());
         ours && !self.can_move(square)
-    }
-
-    /// Return the legal moves of the selected piece, or none when nothing is selected
-    fn selected_moves(&self) -> MoveList {
-        let Some(from) = self.selected else {
-            return MoveList::new();
-        };
-        self.session
-            .moves()
-            .into_iter()
-            .filter(|mv| mv.from() == from)
-            .collect()
-    }
-
-    /// Return the selected piece's move to this square, if it has one
-    pub(super) fn selected_move_to(&self, to: Square) -> Option<Move> {
-        self.selected_moves().into_iter().find(|mv| mv.to() == to)
     }
 
     /// Draw the board as big as the space allows, and handle clicks and drags on it
@@ -179,7 +190,7 @@ impl GameScreen {
 
         board::draw_board(painter, geometry, sprites, settings);
         self.draw_last_move(painter, geometry);
-        if let Some(square) = self.selected {
+        if let Some(square) = self.piece_square() {
             let rect = geometry.square_rect(square);
             board::draw_overlay(painter, rect, Overlay::Selected, accent, sprites);
         }
@@ -187,12 +198,14 @@ impl GameScreen {
             self.draw_reject_flash(painter, geometry, progress);
         }
 
-        // The dragged, shaking or sliding piece is drawn on its own below, so leave it out here
+        // The dragged, shaking, sliding or hopping piece is drawn on its own below, so leave it out here
         let position = self.session.current_position();
+        let mid_capture_start = self.selected.filter(|_| self.is_mid_capture());
         let hidden: Vec<Square> = [
             self.dragging,
             self.rejection.as_ref().map(|rejection| rejection.piece),
-            self.slide.as_ref().map(|slide| slide.mv.to()),
+            self.slide.as_ref().and_then(|slide| slide.lands_on),
+            mid_capture_start,
         ]
         .into_iter()
         .flatten()
@@ -201,6 +214,8 @@ impl GameScreen {
 
         if let Some(progress) = slide_progress {
             self.draw_slide(painter, geometry, sprites, settings, progress);
+        } else {
+            self.draw_hopping_piece(painter, geometry, sprites, settings);
         }
         if let Some(progress) = reject_progress {
             self.draw_shake(painter, geometry, sprites, settings, progress);
@@ -219,7 +234,7 @@ impl GameScreen {
         }
     }
 
-    /// Mark every square the selected piece can move to. Jumps get a different marker, so captures stand out
+    /// Mark every square the selected piece can land on next. Jumps get a different marker, so captures stand out
     fn draw_move_markers(
         &self,
         painter: &Painter,
@@ -227,14 +242,31 @@ impl GameScreen {
         sprites: &mut Sprites,
         tint: Color32,
     ) {
-        for mv in self.selected_moves() {
-            let marker = if mv.is_capture() {
+        for (square, captures) in self.next_landings() {
+            let marker = if captures {
                 Overlay::Capture
             } else {
                 Overlay::Move
             };
-            let rect = geometry.square_rect(mv.to());
+            let rect = geometry.square_rect(square);
             board::draw_overlay(painter, rect, marker, tint, sprites);
+        }
+    }
+
+    /// Partway through a capture, the piece waits on its last hop until the next one
+    fn draw_hopping_piece(
+        &self,
+        painter: &Painter,
+        geometry: &BoardGeometry,
+        sprites: &mut Sprites,
+        settings: &Settings,
+    ) {
+        if self.dragging.is_some() || !self.is_mid_capture() {
+            return;
+        }
+        if let (Some(piece), Some(square)) = (self.selected_piece(), self.piece_square()) {
+            let rect = geometry.square_rect(square);
+            board::draw_piece(painter, rect, piece, 1.0, sprites, settings);
         }
     }
 
@@ -247,13 +279,18 @@ impl GameScreen {
         sprites: &mut Sprites,
         settings: &Settings,
     ) {
-        let position = self.session.current_position();
-        if let Some(from) = self.dragging
-            && let Some(piece) = position.piece_at(from)
+        if self.dragging.is_some()
+            && let Some(piece) = self.selected_piece()
             && let Some(pointer) = ui.input(|input| input.pointer.interact_pos())
         {
             let rect = Rect::from_center_size(pointer, Vec2::splat(geometry.square_size()));
             board::draw_piece(painter, rect, piece, 1.0, sprites, settings);
         }
+    }
+
+    /// Return the selected piece, which stays on its starting square in the position until its move is played
+    pub(super) fn selected_piece(&self) -> Option<Piece> {
+        let square = self.selected?;
+        self.session.current_position().piece_at(square)
     }
 }

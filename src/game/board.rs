@@ -1,7 +1,7 @@
-use super::bitboard::{Bitboard, Square, is_empty, square_mask};
-use super::fen::{START_FEN, SidePieces, format_fen, parse_fen};
+use super::bitboard::{Bitboard, Square, is_empty, square_at, square_mask};
 use super::hash::{PositionHash, pieces_key, white_to_move_key};
 use super::moves::Move;
+use super::pdn::{START_FEN, SidePieces, format_fen, parse_fen};
 use super::piece::Piece;
 use super::side::Side;
 use std::fmt;
@@ -287,13 +287,11 @@ impl fmt::Display for Board {
         for row in 0..8 {
             for col in 0..8 {
                 // Light squares are never used
-                if (row + col) % 2 == 0 {
+                let Some(square) = square_at(row, col) else {
                     write!(f, "{LIGHT_SQUARE_BG}   ")?;
                     continue;
-                }
+                };
 
-                // Each row holds 4 dark squares, one per column pair
-                let square = row * 4 + col / 2;
                 let (color, symbol) = match self.piece_at(square) {
                     Some(Piece::BlackMan) => (BLACK_PIECE_FG, MAN_SYMBOL),
                     Some(Piece::BlackKing) => (BLACK_PIECE_FG, KING_SYMBOL),
@@ -313,14 +311,10 @@ impl fmt::Display for Board {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::generate_moves;
 
     /// Play the legal move with the given notation, like 9-13 or 22x31
     fn play(board: &mut Board, notation: &str) {
-        let mv = generate_moves(board)
-            .into_iter()
-            .find(|mv| mv.to_string() == notation)
-            .unwrap_or_else(|| panic!("{notation} is not legal in {}", board.to_fen()));
+        let mv = Move::from_notation(board, notation).unwrap();
         board.make_move(mv);
     }
 

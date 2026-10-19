@@ -1,7 +1,8 @@
+use super::bitboard::Square;
 use super::board::Board;
 use super::hash::PositionHash;
-use super::movegen::generate_moves;
-use super::moves::{Move, MoveList};
+use super::movegen::{generate_moves, move_path};
+use super::moves::{Move, MoveList, MovePath};
 use super::outcome::{GameOutcome, game_outcome};
 
 /// One game being played, with every position kept for undo and redo
@@ -43,6 +44,19 @@ impl GameSession {
         generate_moves(&self.current_position())
     }
 
+    /// Return the legal moves of the piece on the given square, none if it can't move
+    pub fn moves_from(&self, square: Square) -> MoveList {
+        self.moves()
+            .into_iter()
+            .filter(|mv| mv.from() == square)
+            .collect()
+    }
+
+    /// Return the squares a legal move in the current position lands on, in order
+    pub fn move_path(&self, mv: Move) -> MovePath {
+        move_path(&self.current_position(), mv)
+    }
+
     /// Play a legal move in the current position
     pub fn play(&mut self, mv: Move) {
         debug_assert!(
@@ -69,6 +83,12 @@ impl GameSession {
     /// Return the move that led to the current position, or None at the start
     pub fn last_move(&self) -> Option<Move> {
         self.current.checked_sub(1).map(|index| self.played[index])
+    }
+
+    /// Return the squares the last move landed on in order, or None at the start
+    pub fn last_move_path(&self) -> Option<MovePath> {
+        let index = self.current.checked_sub(1)?;
+        Some(move_path(&self.positions[index], self.played[index]))
     }
 
     /// Return true if there's an earlier position to go back to
@@ -114,7 +134,7 @@ impl Default for GameSession {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::outcome::DrawReason;
+    use crate::game::outcome::{DrawReason, WinReason};
     use crate::game::side::Side;
 
     // Two kings stepping out and back, which returns to the starting position every 4 plies
@@ -123,11 +143,7 @@ mod tests {
 
     /// Play the legal move with the given notation, like 9-13
     fn play(session: &mut GameSession, notation: &str) {
-        let mv = session
-            .moves()
-            .into_iter()
-            .find(|mv| mv.to_string() == notation)
-            .unwrap_or_else(|| panic!("{notation} is not legal"));
+        let mv = Move::from_notation(&session.current_position(), notation).unwrap();
         session.play(mv);
     }
 
@@ -220,6 +236,37 @@ mod tests {
     }
 
     #[test]
+    fn last_move_path_follows_the_jumps() {
+        let mut session = GameSession::from_fen("B:W14,22:B9").unwrap();
+        assert_eq!(session.last_move_path(), None);
+
+        // 9 jumps 14 to 18, then 22 to 25, which are squares 17 and 24 counting from 0
+        play(&mut session, "9x25");
+        assert_eq!(session.last_move_path().unwrap().as_slice(), &[17, 24]);
+
+        // Redo brings back the same route
+        session.undo();
+        session.redo();
+        assert_eq!(session.last_move_path().unwrap().as_slice(), &[17, 24]);
+    }
+
+    #[test]
+    fn moves_from_lists_one_pieces_moves() {
+        let session = GameSession::new();
+
+        // The man on 9 can step to 13 or 14, and the man on 1 is boxed in by its own side.
+        // Sorted, since the order moves come in doesn't matter
+        let mut from_9: Vec<String> = session
+            .moves_from(8)
+            .iter()
+            .map(|mv| mv.to_string())
+            .collect();
+        from_9.sort();
+        assert_eq!(from_9, ["9-13", "9-14"]);
+        assert!(session.moves_from(0).is_empty());
+    }
+
+    #[test]
     fn games_can_start_from_a_fen() {
         let session = GameSession::from_fen(KING_SHUFFLE).unwrap();
         assert_eq!(fen(&session), KING_SHUFFLE);
@@ -250,6 +297,9 @@ mod tests {
     #[test]
     fn side_with_no_pieces_has_lost() {
         let session = GameSession::from_fen("B:W21:B").unwrap();
-        assert_eq!(session.outcome(), Some(GameOutcome::Win(Side::White)));
+        assert_eq!(
+            session.outcome(),
+            Some(GameOutcome::Win(Side::White, WinReason::NoPiecesLeft))
+        );
     }
 }

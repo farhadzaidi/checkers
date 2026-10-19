@@ -1,5 +1,5 @@
 use super::screen::GameScreen;
-use crate::game::{Board, DrawReason, GameOutcome, Side};
+use crate::game::{DrawReason, GameOutcome, Side, WinReason};
 use crate::gui::assets::{Icon, Sprites};
 use crate::gui::screens::Navigation;
 use crate::gui::theme::{self, GROUP_GAP, TITLE_TEXT_SIZE};
@@ -29,7 +29,7 @@ impl GameScreen {
         sprites: &mut Sprites,
     ) -> Option<Navigation> {
         let outcome = self.session.outcome()?;
-        let (title, detail) = result_text(outcome, &self.session.current_position());
+        let (title, detail) = result_text(outcome);
 
         match popup(ctx, sprites, badge(outcome), &title, &detail)? {
             Choice::NewGame => Some(Navigation::NewGame),
@@ -102,26 +102,23 @@ fn popup(
 /// The badge for how a game ended: a crown for a win, or the reason for a draw
 pub(super) fn badge(outcome: GameOutcome) -> Icon {
     match outcome {
-        GameOutcome::Win(_) => Icon::Win,
+        GameOutcome::Win(..) => Icon::Win,
         GameOutcome::Draw(DrawReason::ThreefoldRepetition) => Icon::Repetition,
         GameOutcome::Draw(DrawReason::FortyMoveRule) => Icon::MoveLimit,
     }
 }
 
 /// Return a headline for how the game ended, and a line explaining why
-pub(super) fn result_text(outcome: GameOutcome, position: &Board) -> (String, String) {
+pub(super) fn result_text(outcome: GameOutcome) -> (String, String) {
     match outcome {
-        GameOutcome::Win(winner) => {
-            // A side loses with no pieces left, or with pieces that are all blocked
-            let loser = winner.opposite();
-            let reason = if position.has_pieces(loser) {
-                "has no legal moves"
-            } else {
-                "has no pieces left"
+        GameOutcome::Win(winner, reason) => {
+            let reason = match reason {
+                WinReason::NoPiecesLeft => "has no pieces left",
+                WinReason::NoLegalMoves => "has no legal moves",
             };
             (
                 format!("{} wins", side_name(winner)),
-                format!("{} {reason}", side_name(loser)),
+                format!("{} {reason}", side_name(winner.opposite())),
             )
         }
         GameOutcome::Draw(DrawReason::ThreefoldRepetition) => (

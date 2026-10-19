@@ -1,6 +1,7 @@
 mod animation;
 mod board;
 mod game_over;
+mod hops;
 mod input;
 mod screen;
 mod side_panel;

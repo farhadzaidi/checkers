@@ -14,6 +14,13 @@ pub const MIN_PLIES_FOR_THREEFOLD: usize = 8;
 /// (the current appearance makes the third)
 pub const NUM_POSITION_MATCHES_FOR_THREEFOLD: u8 = 2;
 
+/// Why the losing side lost
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum WinReason {
+    NoPiecesLeft,
+    NoLegalMoves,
+}
+
 /// Why a game ended in a draw
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DrawReason {
@@ -24,7 +31,7 @@ pub enum DrawReason {
 /// How a finished game ended
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum GameOutcome {
-    Win(Side),
+    Win(Side, WinReason),
     Draw(DrawReason),
 }
 
@@ -82,8 +89,13 @@ pub fn game_outcome(
     // A side with no legal moves loses, whether its pieces are all captured or
     // all blocked. This ends the game before any draw rule applies
     if moves.is_empty() {
-        let winner = board.side_to_move().opposite();
-        return Some(GameOutcome::Win(winner));
+        let loser = board.side_to_move();
+        let reason = if board.has_pieces(loser) {
+            WinReason::NoLegalMoves
+        } else {
+            WinReason::NoPiecesLeft
+        };
+        return Some(GameOutcome::Win(loser.opposite(), reason));
     }
 
     let plies_since_progress = board.plies_since_progress();
@@ -108,8 +120,8 @@ pub fn game_outcome(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::fen::START_FEN;
-    use crate::game::generate_moves;
+    use crate::game::pdn::START_FEN;
+    use crate::game::{Move, generate_moves};
 
     // Two kings stepping out and back, which returns to the starting position every 4 plies
     const KING_SHUFFLE: &str = "B:WK29:BK1";
@@ -121,10 +133,7 @@ mod tests {
         let mut history = Vec::new();
 
         for &notation in notations {
-            let mv = generate_moves(&board)
-                .into_iter()
-                .find(|mv| mv.to_string() == notation)
-                .unwrap_or_else(|| panic!("{notation} is not legal in {}", board.to_fen()));
+            let mv = Move::from_notation(&board, notation).unwrap();
 
             history.push(board.hash());
             board.make_move(mv);
@@ -153,7 +162,7 @@ mod tests {
     fn side_with_no_pieces_loses() {
         assert_eq!(
             outcome_after("B:W21:B", &[]),
-            Some(GameOutcome::Win(Side::White))
+            Some(GameOutcome::Win(Side::White, WinReason::NoPiecesLeft))
         );
     }
 
@@ -162,7 +171,16 @@ mod tests {
         // The man on 5 can't step onto 9, and can't jump it because 14 is taken
         assert_eq!(
             outcome_after("B:W9,14:B5", &[]),
-            Some(GameOutcome::Win(Side::White))
+            Some(GameOutcome::Win(Side::White, WinReason::NoLegalMoves))
+        );
+    }
+
+    #[test]
+    fn capturing_the_last_piece_wins() {
+        // Black jumps White's only man, leaving White with nothing
+        assert_eq!(
+            outcome_after("B:W18:B14", &["14x23"]),
+            Some(GameOutcome::Win(Side::Black, WinReason::NoPiecesLeft))
         );
     }
 

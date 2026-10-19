@@ -62,7 +62,7 @@ impl GameScreen {
                 let icon = badge(outcome);
                 let image =
                     widgets::icon_image(ui.ctx(), sprites, icon, STATUS_IMAGE_SIZE, palette.accent);
-                (image, result_text(outcome, &position).0)
+                (image, result_text(outcome).0)
             }
             None => {
                 let side = position.side_to_move();
@@ -92,7 +92,7 @@ impl GameScreen {
 
     /// Undo and Redo side by side, greyed out when there's nothing to step to, with the keyboard hint below
     fn undo_redo(&mut self, ui: &mut egui::Ui, sprites: &mut Sprites) {
-        let (can_undo, can_redo) = (self.session.can_undo(), self.session.can_redo());
+        let (can_undo, can_redo) = (self.can_undo(), self.can_redo());
         ui.columns(2, |columns| {
             let undo = columns[0].add_enabled_ui(can_undo, |ui| {
                 widgets::wide_button(ui, sprites, Icon::Undo, "Undo")

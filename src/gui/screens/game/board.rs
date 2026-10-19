@@ -1,4 +1,4 @@
-use crate::game::{Board, Piece, Side, Square};
+use crate::game::{self, Board, Piece, Side, Square};
 use crate::gui::assets::{Overlay, Sprites};
 use crate::gui::settings::Settings;
 use eframe::egui::{Color32, Painter, Pos2, Rect, Vec2, pos2};
@@ -64,20 +64,12 @@ impl BoardGeometry {
         let screen_row = (offset.y as usize).min(7);
         let screen_col = (offset.x as usize).min(7);
         let (row, col) = self.orient(screen_row, screen_col);
-
-        // Pieces only stand on the dark squares, where row + col is odd
-        if (row + col) % 2 == 0 {
-            return None;
-        }
-        Some((row * 4 + col / 2) as Square)
+        game::square_at(row, col)
     }
 
     /// Return the row and column a square is drawn at, counted from the top left of the screen
     fn screen_cell(&self, square: Square) -> (usize, usize) {
-        // Each row holds 4 dark squares: odd columns on even rows, even columns on odd rows.
-        // Square 0 is row 0, column 1 and square 4 is row 1, column 0
-        let row = square as usize / 4;
-        let col = (square as usize % 4) * 2 + (1 - row % 2);
+        let (row, col) = game::row_and_col(square);
         self.orient(row, col)
     }
 

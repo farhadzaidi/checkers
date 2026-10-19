@@ -4,12 +4,14 @@ use crate::game::Square;
 use eframe::egui::{self, CursorIcon, Key, Pos2};
 
 impl GameScreen {
-    /// Left and right arrows step back and forward through the moves, like the Undo and Redo buttons
+    /// Left and right arrows step back and forward through the moves, like the Undo and Redo buttons.
+    /// Escape puts a piece partway through a capture back where it started
     pub(super) fn handle_keys(&mut self, ui: &egui::Ui) {
-        let (left, right) = ui.input(|input| {
+        let (left, right, escape) = ui.input(|input| {
             (
                 input.key_pressed(Key::ArrowLeft),
                 input.key_pressed(Key::ArrowRight),
+                input.key_pressed(Key::Escape),
             )
         });
         if left {
@@ -17,6 +19,9 @@ impl GameScreen {
         }
         if right {
             self.redo();
+        }
+        if escape {
+            self.cancel_hops();
         }
     }
 
@@ -51,14 +56,22 @@ impl GameScreen {
         geometry: &BoardGeometry,
     ) {
         let hovered = response.hover_pos().and_then(|pos| geometry.square_at(pos));
+        let grabbable = |square: Square| {
+            if self.is_mid_capture() {
+                Some(square) == self.piece_square()
+            } else {
+                self.can_move(square)
+            }
+        };
+
         if self.dragging.is_some() {
             ui.ctx().set_cursor_icon(CursorIcon::Grabbing);
-        } else if hovered.is_some_and(|square| self.can_move(square)) {
+        } else if hovered.is_some_and(grabbable) {
             ui.ctx().set_cursor_icon(CursorIcon::PointingHand);
         }
     }
 
-    /// Play a move if the click lands on one of the selected piece's targets, otherwise change the selection
+    /// Move the selected piece if the click lands on one of its next squares, otherwise change the selection
     fn click(&mut self, square: Option<Square>, now: f64) {
         self.rejection = None;
         if self.session.outcome().is_some() {
@@ -66,10 +79,21 @@ impl GameScreen {
             return;
         }
 
-        if let Some(to) = square
-            && let Some(mv) = self.selected_move_to(to)
+        if let Some(target) = square
+            && self.land(target, None)
         {
-            self.play(mv, None);
+            return;
+        }
+
+        // Partway through a capture the piece has to keep jumping, so anywhere else is refused.
+        // Clicking the piece itself does nothing. The piece is still on its starting square in the
+        // position, so nothing stands on its hop square to shake; only the red flash shows
+        if self.is_mid_capture() {
+            if square != self.piece_square()
+                && let Some(piece) = self.piece_square()
+            {
+                self.reject(piece, square, now);
+            }
             return;
         }
 
@@ -101,6 +125,14 @@ impl GameScreen {
             return;
         }
 
+        // Partway through a capture, only the hopping piece can be picked up
+        if self.is_mid_capture() {
+            if Some(square) == self.piece_square() {
+                self.dragging = Some(square);
+            }
+            return;
+        }
+
         if self.can_move(square) {
             self.dragging = Some(square);
             self.selected = Some(square);
@@ -109,17 +141,18 @@ impl GameScreen {
         }
     }
 
-    /// Play the dragged piece's move to the square it was dropped on, or send it back if that's not legal
+    /// Move the dragged piece to the square it was dropped on, or send it back if no route goes there
     fn drop(&mut self, square: Option<Square>, pointer: Option<Pos2>, now: f64) {
         let Some(from) = self.dragging.take() else {
             return;
         };
 
-        if let Some(to) = square
-            && let Some(mv) = self.selected_move_to(to)
+        if let Some(target) = square
+            && self.land(target, pointer)
         {
-            self.play(mv, pointer);
-        } else if square != Some(from) {
+            return;
+        }
+        if square != Some(from) {
             // Dropping it back where it started just leaves it selected
             self.reject(from, square, now);
         }

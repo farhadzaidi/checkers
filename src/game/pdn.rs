@@ -1,5 +1,20 @@
 use super::bitboard::{Bitboard, EMPTY_BITBOARD, Square, is_empty, pop_lsb, square_mask};
+use super::moves::Move;
 use super::side::Side;
+
+// Reading and writing PDN, the standard text format for checkers: square numbers, positions (FEN)
+// and moves. Everything here works on text and plain data; Board and Move turn it into the real thing.
+//
+// PDN numbers the dark squares 1-32, starting from Black's side of the board. We store them as
+// bit indexes 0-31, so square 22 in notation is square 21 in the code.
+
+/// Parse a square number from 1 to 32 into its bit index
+pub fn parse_square(text: &str) -> Result<Square, String> {
+    match text.trim().parse::<Square>() {
+        Ok(number @ 1..=32) => Ok(number - 1),
+        _ => Err(format!("expected a square from 1 to 32, found '{text}'")),
+    }
+}
 
 // Positions are written in PDN's FEN format, three fields split by colons:
 //     1. Side to move: B or W
@@ -118,14 +133,6 @@ fn parse_side(text: &str) -> Result<Side, String> {
     }
 }
 
-/// Parse a square number from 1 to 32 into its bit index
-fn parse_square(text: &str) -> Result<Square, String> {
-    match text.trim().parse::<Square>() {
-        Ok(number @ 1..=32) => Ok(number - 1),
-        _ => Err(format!("expected a square from 1 to 32, found '{text}'")),
-    }
-}
-
 /// Write a position as a PDN FEN string
 pub fn format_fen(side_to_move: Side, white: &SidePieces, black: &SidePieces) -> String {
     // Write each field, then join them with colons
@@ -172,6 +179,80 @@ fn side_letter(side: Side) -> char {
         Side::Black => 'B',
         Side::White => 'W',
     }
+}
+
+// Moves are written with the same square numbers:
+//     9-13       a simple step
+//     15x24      a capture, from its start to its final square
+//     6x13x22    a capture with every square it lands on, for when two captures share their ends
+
+/// A move as written, before it's matched to a legal move in a position
+pub struct ParsedMove {
+    pub from: Square,
+    // Every square written after the start: just the final square, or each square a capture lands on
+    pub landings: Vec<Square>,
+    pub is_capture: bool,
+}
+
+/// Write a move in standard notation, like 11-15 or 15x24
+pub fn format_move(mv: Move) -> String {
+    // Notation numbers squares 1-32, but we store them as bits 0-31
+    let from = mv.from() + 1;
+    let to = mv.to() + 1;
+
+    // Captures use an x, simple steps use a dash
+    let separator = if mv.is_capture() { 'x' } else { '-' };
+    format!("{from}{separator}{to}")
+}
+
+/// Parse move notation into its squares and whether it's a capture
+///     "9-13" -> from 8, landing on [12], a step
+///     "6x13x22" -> from 5, landing on [12, 21], a capture
+pub fn parse_move(notation: &str) -> Result<ParsedMove, String> {
+    // Captures use an x, simple steps use a dash
+    let notation = notation.trim();
+    let is_capture = notation.contains('x');
+    let separator = if is_capture { 'x' } else { '-' };
+    let parts: Vec<&str> = notation.split(separator).collect();
+
+    // A step goes between two squares; a capture can list every square it lands on
+    let too_few = parts.len() < 2;
+    let step_with_extra_squares = !is_capture && parts.len() > 2;
+    if too_few || step_with_extra_squares {
+        return Err(format!(
+            "expected a move like 9-13, 15x24 or 6x13x22, found '{notation}'"
+        ));
+    }
+
+    let from = parse_square(parts[0])?;
+    let mut landings = Vec::new();
+    for part in &parts[1..] {
+        landings.push(parse_square(part)?);
+    }
+
+    Ok(ParsedMove {
+        from,
+        landings,
+        is_capture,
+    })
+}
+
+/// Return true if the move starts and lands where the parsed notation says. The path is the
+/// squares the move lands on, which matter when the notation writes every one of them
+///     from 5, landing on [21] -> any capture from 5 that ends on 21
+///     from 5, landing on [12, 21] -> only the capture that lands on 12, then 21
+pub fn describes(mv: Move, parsed: &ParsedMove, path: &[Square]) -> bool {
+    if mv.from() != parsed.from || mv.is_capture() != parsed.is_capture {
+        return false;
+    }
+
+    // Just the start and end written: only the final square has to match
+    if let [to] = parsed.landings.as_slice() {
+        return mv.to() == *to;
+    }
+
+    // Every landing written: the whole route has to match
+    path == parsed.landings
 }
 
 #[cfg(test)]
@@ -249,6 +330,30 @@ mod tests {
 
         for fen in bad {
             assert!(Board::from_fen(fen).is_err(), "'{fen}' should be rejected");
+        }
+    }
+
+    #[test]
+    fn steps_have_a_start_and_one_landing() {
+        let parsed = parse_move("9-13").unwrap();
+        assert_eq!(parsed.from, 8);
+        assert_eq!(parsed.landings, [12]);
+        assert!(!parsed.is_capture);
+    }
+
+    #[test]
+    fn captures_can_list_every_landing() {
+        let parsed = parse_move("6x13x22").unwrap();
+        assert_eq!(parsed.from, 5);
+        assert_eq!(parsed.landings, [12, 21]);
+        assert!(parsed.is_capture);
+    }
+
+    #[test]
+    fn bad_moves_are_rejected() {
+        // One square, a step with extra squares, squares off the board, and not numbers
+        for notation in ["9", "9-13-17", "0-4", "9-33", "9x", "nine-13"] {
+            assert!(parse_move(notation).is_err(), "{notation} was accepted");
         }
     }
 }

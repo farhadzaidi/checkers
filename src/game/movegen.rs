@@ -3,7 +3,7 @@ use super::bitboard::{
 };
 use super::board::Board;
 use super::direction::{Direction, DirectionPair, KING_DIRECTIONS, forward};
-use super::moves::{Move, MoveList};
+use super::moves::{Move, MoveList, MovePath};
 
 /// Snapshot of one position for a single move generation
 struct MoveGenerator {
@@ -26,6 +26,31 @@ struct JumpContext<'a> {
     stop_row: Bitboard,
     // Empty squares, counting the jumper's own starting square
     empty: Bitboard,
+}
+
+impl JumpContext<'_> {
+    /// Return the piece jumped and the square landed on, jumping from the current square in this
+    /// direction, or None if there's nothing jumpable next to it or the landing is blocked
+    fn jump(
+        &self,
+        current: Bitboard,
+        jumpable: Bitboard,
+        direction: Direction,
+    ) -> Option<(Bitboard, Bitboard)> {
+        // Step once and keep a piece that may be jumped
+        let capture = shift(current, direction) & jumpable;
+        if is_empty(capture) {
+            return None;
+        }
+
+        // Step once more and keep the landing square if it's empty
+        let landing = shift(capture, direction) & self.empty;
+        if is_empty(landing) {
+            return None;
+        }
+
+        Some((capture, landing))
+    }
 }
 
 impl MoveGenerator {
@@ -85,24 +110,28 @@ impl MoveGenerator {
         let mut remaining = jumpers;
         while !is_empty(remaining) {
             let jumper = pop_lsb(&mut remaining);
-            let jumper_mask = square_mask(jumper);
-            let search_empty = jumper_mask | self.empty;
+            let context = self.jump_context(jumper);
+            self.jump_search(&context, square_mask(jumper), EMPTY_BITBOARD, moves);
+        }
+    }
 
-            // Men only jump forward and stop on the promotion row; kings never stop early
-            let is_man = is_empty(jumper_mask & self.our_kings);
-            let (directions, stop_row): (&[Direction], Bitboard) = if is_man {
-                (&self.forward_directions, self.promotion_row)
-            } else {
-                (&KING_DIRECTIONS, EMPTY_BITBOARD)
-            };
+    /// Set up a jump search for the piece on the given square
+    fn jump_context(&self, jumper: Square) -> JumpContext<'_> {
+        let jumper_mask = square_mask(jumper);
 
-            let context = JumpContext {
-                origin: jumper,
-                directions,
-                stop_row,
-                empty: search_empty,
-            };
-            self.jump_search(&context, jumper_mask, EMPTY_BITBOARD, moves);
+        // Men only jump forward and stop on the promotion row; kings never stop early
+        let is_man = is_empty(jumper_mask & self.our_kings);
+        let (directions, stop_row): (&[Direction], Bitboard) = if is_man {
+            (&self.forward_directions, self.promotion_row)
+        } else {
+            (&KING_DIRECTIONS, EMPTY_BITBOARD)
+        };
+
+        JumpContext {
+            origin: jumper,
+            directions,
+            stop_row,
+            empty: jumper_mask | self.empty,
         }
     }
 
@@ -115,13 +144,11 @@ impl MoveGenerator {
         moves: &mut MoveList,
     ) {
         // Depth-first search over jump paths. For each allowed direction:
-        //     1. Step once and keep enemy pieces not yet captured in this sequence
-        //         (nothing there means this direction is blocked, try the next)
-        //     2. Step once more and keep empty squares
-        //         (nothing there means the landing is blocked, try the next)
-        //     3. Landing on the stop row ends the move (a man reaching its promotion
+        //     1. Try to jump an enemy piece not yet captured in this sequence
+        //         (nothing to jump or a blocked landing means try the next direction)
+        //     2. Landing on the stop row ends the move (a man reaching its promotion
         //         row is crowned): push the move here instead of recursing
-        //     4. Otherwise recurse from the landing square with the jumped piece
+        //     3. Otherwise recurse from the landing square with the jumped piece
         //         added to the captures
         // Each branch gets its own copy of the current square and captures, so paths
         // never affect each other.
@@ -129,33 +156,26 @@ impl MoveGenerator {
         // If no direction produced a jump, this square is where the path ends:
         // push one move from the origin to here with every capture along the way.
 
+        // Any enemy piece can be jumped, as long as it wasn't already jumped on this path
+        let jumpable = self.them & !captured;
+
         let mut can_continue_jumping = false;
         for &direction in context.directions {
-            let potential_capture = shift(current, direction) & self.them & !captured;
-            if is_empty(potential_capture) {
+            let Some((capture, landing)) = context.jump(current, jumpable, direction) else {
                 continue;
-            }
-
-            let landing = shift(potential_capture, direction) & context.empty;
-            if is_empty(landing) {
-                continue;
-            }
+            };
 
             // Found a capture/landing spot
             can_continue_jumping = true;
 
             // Stop here if a man lands on a promotion row
             if !is_empty(landing & context.stop_row) {
-                let mv = Move::new(
-                    context.origin,
-                    to_square(landing),
-                    captured | potential_capture,
-                );
+                let mv = Move::new(context.origin, to_square(landing), captured | capture);
                 moves.push(mv);
                 continue;
             }
 
-            self.jump_search(context, landing, captured | potential_capture, moves);
+            self.jump_search(context, landing, captured | capture, moves);
         }
 
         // We hit a dead end so we can push the move here
@@ -166,6 +186,41 @@ impl MoveGenerator {
             let mv = Move::new(context.origin, to_square(current), captured);
             moves.push(mv);
         }
+    }
+
+    /// Follow the given capture from the current square, pushing each landing square onto the path.
+    /// Return true once the path takes every piece the move captures and ends on its final square
+    fn find_path(
+        &self,
+        context: &JumpContext,
+        current: Bitboard,
+        captured: Bitboard,
+        mv: Move,
+        path: &mut MovePath,
+    ) -> bool {
+        // Every piece taken: this is the route only if it ended where the move ends
+        if captured == mv.captures() {
+            return current == square_mask(mv.to());
+        }
+
+        // Same steps as jump_search, but only over pieces this move captures. A direction
+        // that leads to a dead end is taken back off the path, and the next one is tried
+        //     6x22 capturing 10 and 18 -> try over 9 (not captured, skip), then over 10 to 15,
+        //     then over 18 to 22 -> path [15, 22]
+        let jumpable = mv.captures() & !captured;
+        for &direction in context.directions {
+            let Some((capture, landing)) = context.jump(current, jumpable, direction) else {
+                continue;
+            };
+
+            path.push(to_square(landing));
+            if self.find_path(context, landing, captured | capture, mv, path) {
+                return true;
+            }
+            path.pop();
+        }
+
+        false
     }
 
     /// Push every simple one-step move (no captures)
@@ -189,6 +244,30 @@ impl MoveGenerator {
             generate(self.our_kings, direction);
         }
     }
+}
+
+/// Return the squares a legal move lands on in order, ending on its final square
+pub fn move_path(board: &Board, mv: Move) -> MovePath {
+    // A simple step lands once, on its destination
+    let mut path = MovePath::new();
+    if !mv.is_capture() {
+        path.push(mv.to());
+        return path;
+    }
+
+    // A capture is followed hop by hop from its starting square
+    let generator = MoveGenerator::new(board);
+    let context = generator.jump_context(mv.from());
+    let found = generator.find_path(
+        &context,
+        square_mask(mv.from()),
+        EMPTY_BITBOARD,
+        mv,
+        &mut path,
+    );
+    debug_assert!(found, "{mv} is not a legal capture in {}", board.to_fen());
+
+    path
 }
 
 /// Return every legal move for the side to move
@@ -229,17 +308,17 @@ mod tests {
         moves
     }
 
-    /// Return the capture bitboard of every legal move, using notation squares 1-32
+    /// Return the captured squares of every legal move, using notation squares 1-32
     fn captured_squares(fen: &str) -> Vec<Vec<Square>> {
         let board = Board::from_fen(fen).unwrap();
         let mut result = Vec::new();
 
         for mv in generate_moves(&board) {
-            let mut remaining = mv.captures();
-            let mut squares = Vec::new();
-            while !is_empty(remaining) {
-                squares.push(pop_lsb(&mut remaining) + 1);
-            }
+            let squares = mv
+                .captured_squares()
+                .iter()
+                .map(|square| square + 1)
+                .collect();
             result.push(squares);
         }
 
@@ -250,7 +329,7 @@ mod tests {
     #[test]
     fn start_position_has_seven_moves() {
         let expected = ["10-14", "10-15", "11-15", "11-16", "12-16", "9-13", "9-14"];
-        assert_eq!(legal_moves(crate::game::fen::START_FEN), expected);
+        assert_eq!(legal_moves(crate::game::pdn::START_FEN), expected);
     }
 
     #[test]
@@ -313,5 +392,55 @@ mod tests {
     #[test]
     fn side_with_no_pieces_has_no_moves() {
         assert!(legal_moves("B:W21:B").is_empty());
+    }
+
+    /// Return every legal move with the squares it lands on, using notation squares 1-32
+    fn paths(fen: &str) -> Vec<(String, Vec<Square>)> {
+        let board = Board::from_fen(fen).unwrap();
+        let mut result = Vec::new();
+
+        for mv in generate_moves(&board) {
+            let landings = move_path(&board, mv)
+                .iter()
+                .map(|square| square + 1)
+                .collect();
+            result.push((mv.to_string(), landings));
+        }
+
+        result.sort();
+        result
+    }
+
+    #[test]
+    fn simple_step_lands_once() {
+        assert_eq!(paths("B:W:B5"), [("5-9".to_string(), vec![9])]);
+    }
+
+    #[test]
+    fn two_routes_to_the_same_square_have_different_paths() {
+        // Around the diamond of 9, 10, 17 and 18: down the left through 13, or the right through 15
+        assert_eq!(
+            paths("B:W9,10,17,18:B6"),
+            [
+                ("6x22".to_string(), vec![13, 22]),
+                ("6x22".to_string(), vec![15, 22]),
+            ]
+        );
+    }
+
+    #[test]
+    fn king_path_follows_its_turns() {
+        // Up over 14 to 9, then over 6 to 2
+        assert_eq!(paths("B:W6,14:BK18"), [("18x2".to_string(), vec![9, 2])]);
+    }
+
+    #[test]
+    fn looping_king_path_ends_where_it_started() {
+        // Four jumps around 10, landing back on 10
+        for (notation, landings) in paths("B:W14,15,22,23:BK10") {
+            assert_eq!(notation, "10x10");
+            assert_eq!(landings.len(), 4);
+            assert_eq!(landings.last(), Some(&10));
+        }
     }
 }

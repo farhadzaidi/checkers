@@ -25,6 +25,33 @@ pub fn to_square(bb: Bitboard) -> Square {
     bb.trailing_zeros() as Square
 }
 
+/// Return the row and column of a square on the full 8x8 board, counted from the top left
+pub fn row_and_col(square: Square) -> (usize, usize) {
+    debug_assert!(square < 32, "square {square} is off the board");
+
+    // Each row holds 4 dark squares: odd columns on even (right-aligned) rows,
+    // even columns on odd (left-aligned) rows
+    //     square 0 -> row 0, column 1
+    //     square 4 -> row 1, column 0
+    let row = square as usize / 4;
+    let col = (square as usize % 4) * 2 + (1 - row % 2);
+    (row, col)
+}
+
+/// Return the square at a row and column of the full 8x8 board, or None for a light square
+pub fn square_at(row: usize, col: usize) -> Option<Square> {
+    debug_assert!(
+        row < 8 && col < 8,
+        "row {row}, column {col} is off the board"
+    );
+
+    // Pieces only stand on the dark squares, where row + col is odd
+    if (row + col).is_multiple_of(2) {
+        return None;
+    }
+    Some((row * 4 + col / 2) as Square)
+}
+
 // Each row has 4 dark squares (one hex digit), counted from the top row.
 // Rows alternate between two shapes:
 //   - Right-aligned: the dark squares sit to the right, so the last one is on
@@ -94,15 +121,10 @@ mod tests {
         (Direction::DownRight, 1, 1),
     ];
 
-    /// Return a square's row and column on the full 8x8 board
+    /// Return a square's row and column as signed numbers, so a step off the board can go negative
     fn row_col(square: Square) -> (i32, i32) {
-        let row = (square / 4) as i32;
-
-        // Right-aligned rows (0, 2, ...) start at column 1, left-aligned rows at column 0
-        let first_col = if row % 2 == 0 { 1 } else { 0 };
-        let col = first_col + (square % 4) as i32 * 2;
-
-        (row, col)
+        let (row, col) = row_and_col(square);
+        (row as i32, col as i32)
     }
 
     #[test]
@@ -160,5 +182,30 @@ mod tests {
         for square in 0..32 {
             assert_eq!(to_square(square_mask(square)), square);
         }
+    }
+
+    #[test]
+    fn corner_squares_sit_where_the_board_has_them() {
+        // Square 1 in notation is in the top row's second column, and 32 in the bottom row's seventh
+        assert_eq!(row_and_col(0), (0, 1));
+        assert_eq!(row_and_col(3), (0, 7));
+        assert_eq!(row_and_col(4), (1, 0));
+        assert_eq!(row_and_col(31), (7, 6));
+    }
+
+    #[test]
+    fn row_and_col_and_square_at_round_trip() {
+        for square in 0..32 {
+            let (row, col) = row_and_col(square);
+            assert_eq!(square_at(row, col), Some(square));
+        }
+    }
+
+    #[test]
+    fn light_squares_hold_no_square() {
+        // The top left corner is light, and so is every square where row + col is even
+        assert_eq!(square_at(0, 0), None);
+        assert_eq!(square_at(7, 7), None);
+        assert_eq!(square_at(3, 5), None);
     }
 }
