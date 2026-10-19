@@ -5,9 +5,18 @@ edition = "2024"
 
 [dependencies]
 arrayvec = "0.7.8"
+eframe = { version = "0.35.0", features = ["glow", "persistence"] }
+egui_extras = { version = "0.35.0", features = ["svg", "file"] }
 rand = "0.10.3"
+resvg = { version = "0.45", default-features = false }
+serde = { version = "1.0.229", features = ["derive"] }
 
 # Optimize test builds so perft runs fast, while keeping debug assertions
 # and overflow checks on
 [profile.test]
+opt-level = 3
+
+# Optimize dependencies in debug builds too. SVG rasterizing and the GUI are
+# many times slower unoptimized, and our own code stays quick to rebuild
+[profile.dev.package."*"]
 opt-level = 3

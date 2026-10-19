@@ -1,19 +1,23 @@
 use checkers::game::Board;
-use checkers::perft;
+use checkers::{gui, perft};
 use std::env;
 
-/// Run perft or divide from the starting position
-fn main() {
+/// Open the game window, or run perft or divide from the starting position
+fn main() -> eframe::Result {
     let args: Vec<String> = env::args().collect();
     let board = Board::start_position();
 
-    // Usage: cargo run --release -- perft <depth>
+    // Usage: cargo run --release                     opens the game
+    //        cargo run --release -- perft <depth>
     //        cargo run --release -- divide <depth>
     match args.get(1).map(String::as_str) {
+        None => return gui::run(),
         Some("perft") => perft::run(&board, parse_depth(&args)),
         Some("divide") => perft::divide(&board, parse_depth(&args)),
-        _ => eprintln!("usage: perft <depth> | divide <depth>"),
+        Some(_) => eprintln!("usage: [perft <depth> | divide <depth>]"),
     }
+
+    Ok(())
 }
 
 /// Read the depth that follows a perft or divide command
