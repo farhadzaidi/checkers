@@ -424,17 +424,18 @@ TINTED = {"color": "#ffffff"}
 # light mode so they hold up against the grey
 LOGOS = {
     "dark": {"text": "#e4e6e9", "gold_light": "#f2d27c", "gold": "#d6a646", "gold_dark": "#8f6a24", "shadow": "0.45"},
-    "light": {"text": "#1e2024", "gold_light": "#d0a24a", "gold": "#a8771f", "gold_dark": "#6e4c12", "shadow": "0.18"},
+    "light": {"text": "#2a2118", "gold_light": "#d0a24a", "gold": "#a8771f", "gold_dark": "#6e4c12", "shadow": "0.18"},
 }
 
-# Backdrops: cloth under a pool of light, in neutral greys so the boards bring the colour.
-# The light one is a mid-light grey rather than white, to be easy on the eyes. Fibres and
-# threads set how strongly the cloth's texture shows; the motif is the lattice near the edges
+# Backdrops: cloth under a pool of light, so the boards bring the colour. The dark one is neutral
+# grey; the light one is a mid-toned warm stone, since gold looks muddy on cool greys, matching the
+# light palette in src/gui/theme/palette.rs. Fibres and threads set how strongly the cloth's
+# texture shows; the motif is the lattice near the edges
 BACKGROUNDS = {
     "dark": {"center": "#2b2d31", "middle": "#1d1e21", "edge": "#0b0b0d",
              "fibres": "0.06", "threads": "0.04", "motif": "#ffffff", "motif_strength": "0.035",
              "vignette": "0.5"},
-    "light": {"center": "#c2c5ca", "middle": "#b6b9be", "edge": "#959aa1",
+    "light": {"center": "#b0a797", "middle": "#a49b8c", "edge": "#857b6c",
               "fibres": "0.05", "threads": "0.06", "motif": "#000000", "motif_strength": "0.045",
               "vignette": "0.12"},
 }

@@ -42,7 +42,7 @@
     <path d="M-13.5 6.8 H13.5 L13 10 Q0 12 -13 10 Z" fill="#6e4c12" opacity="0.45"/>
   </g>
 
-  <use href="#word" transform="translate(166 99)" fill="#1e2024"/>
+  <use href="#word" transform="translate(166 99)" fill="#2a2118"/>
 
   <!-- A thin gold rule under the word, broken by a small checkered diamond -->
   <g transform="translate(373.5 126)">
