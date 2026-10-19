@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <!-- Backdrop behind the menus and the board: cloth lit by a soft pool of light in the
+       middle, darkening toward the edges, with a faint checkered lattice showing only near
+       the edges. The app scales it to cover the window and crops it, so nothing important
+       sits near the edges. Colour slots in double braces come from scripts/generate_assets.py,
+       one palette for dark mode and one for light.
+       Noise filters are costly over a whole screen, so the cloth's texture is computed once
+       in a small seamless tile and repeated -->
+  <defs>
+    <!-- The pool of light -->
+    <radialGradient id="base" cx="50%" cy="46%" r="72%">
+      <stop offset="0%" stop-color="{{center}}"/>
+      <stop offset="55%" stop-color="{{middle}}"/>
+      <stop offset="100%" stop-color="{{edge}}"/>
+    </radialGradient>
+
+    <!-- Cloth: fine fibres in every direction, plus threads along the warp and weft -->
+    <filter id="fibres" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <filter id="threads" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9 0.03" numOctaves="2" seed="8" stitchTiles="stitch" result="warp"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.9" numOctaves="2" seed="9" stitchTiles="stitch"/>
+      <feComposite in2="warp" operator="arithmetic" k2="0.5" k3="0.5"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <pattern id="cloth" x="0" y="0" width="256" height="256" patternUnits="userSpaceOnUse">
+      <rect width="256" height="256" filter="url(#fibres)" opacity="{{fibres}}"/>
+      <rect width="256" height="256" filter="url(#threads)" opacity="{{threads}}"/>
+    </pattern>
+
+    <!-- The lattice fades out toward the middle, so it never shows behind the board -->
+    <radialGradient id="toward-edges" cx="50%" cy="50%" r="70%">
+      <stop offset="35%" stop-color="{{motif}}" stop-opacity="0"/>
+      <stop offset="100%" stop-color="{{motif}}" stop-opacity="{{motif_strength}}"/>
+    </radialGradient>
+
+    <radialGradient id="vignette" cx="50%" cy="48%" r="75%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="{{vignette}}"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#base)"/>
+  <!-- Checkered lattice: squares turned on their points, drawn by the generator -->
+  <path d="{{lattice}}" fill="url(#toward-edges)"/>
+  <rect width="1920" height="1080" fill="url(#cloth)"/>
+  <rect width="1920" height="1080" fill="url(#vignette)"/>
+</svg>

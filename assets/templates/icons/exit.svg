@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Exit: an arrow leaving through an open door frame. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="{{color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 4H6.5A1.5 1.5 0 0 0 5 5.5v13A1.5 1.5 0 0 0 6.5 20H13"/><path d="M10 12h11"/><path d="m17 8 4 4-4 4"/>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Back: an arrow pointing left. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="{{color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+  </g>
+</svg>

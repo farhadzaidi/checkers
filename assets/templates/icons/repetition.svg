@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Draw by repetition: two arrows chasing each other round. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="{{color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m17 2 3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="m7 22-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Generated from assets/templates/icons/loading.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- Loading: eight dots on a ring, each smaller and fainter than the one before it, so the
+       app can spin the whole icon. The leading dot is at the top and the tail runs clockwise,
+       so spin it anticlockwise to lead with the brightest dot. The colour slot is filled with
+       white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="#ffffff">
+    <circle cx="12.00" cy="4.00" r="2.20" opacity="1.00"/>
+    <circle cx="17.66" cy="6.34" r="2.08" opacity="0.89"/>
+    <circle cx="20.00" cy="12.00" r="1.96" opacity="0.77"/>
+    <circle cx="17.66" cy="17.66" r="1.84" opacity="0.66"/>
+    <circle cx="12.00" cy="20.00" r="1.72" opacity="0.54"/>
+    <circle cx="6.34" cy="17.66" r="1.60" opacity="0.42"/>
+    <circle cx="4.00" cy="12.00" r="1.48" opacity="0.31"/>
+    <circle cx="6.34" cy="6.34" r="1.36" opacity="0.19"/>
+  </g>
+</svg>

@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- Wooden board: a 40px mitered frame around an 8x8 grid of 90px squares, light square in
+       the top-left. Colour slots in double braces come from the style's palette in
+       scripts/generate_assets.py; {{squares}} is drawn there, one piece of wood per square -->
+  <defs>
+    <!-- Wood grain, drawn in a darker shade of the wood: across on light squares, down on dark
+         ones (the noise is stretched each way, since renderers don't rotate it).
+         Fine streaks, plus growth rings: contour lines of a slow, stretched noise, which
+         give the arches of flat-sawn timber, softened a little -->
+    <filter id="grain-light" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.005 0.15" numOctaves="4" seed="11"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="streaks"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.004 0.03" numOctaves="2" seed="17"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0"/>
+      </feComponentTransfer>
+      <feGaussianBlur stdDeviation="0.4" result="rings"/>
+      <feComposite in="streaks" in2="rings" operator="arithmetic" k2="1" k3="{{light_figure}}" result="marks"/>
+      <feFlood flood-color="{{light_grain_color}}"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+    <filter id="grain-dark" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.15 0.005" numOctaves="4" seed="23"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="streaks"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.004" numOctaves="2" seed="29"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0"/>
+      </feComponentTransfer>
+      <feGaussianBlur stdDeviation="0.4" result="rings"/>
+      <feComposite in="streaks" in2="rings" operator="arithmetic" k2="1" k3="{{dark_figure}}" result="marks"/>
+      <feFlood flood-color="{{dark_grain_color}}"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+    <filter id="grain-frame" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.003 0.14" numOctaves="4" seed="31"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="marks"/>
+      <feFlood flood-color="{{frame_grain_color}}"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+    <filter id="grain-frame-down" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.14 0.003" numOctaves="4" seed="31"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="marks"/>
+      <feFlood flood-color="{{frame_grain_color}}"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+
+    <!-- Fine pores over everything, so no surface looks perfectly smooth -->
+    <filter id="pores" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="5"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+
+    <!-- Seam between squares: light along the top and left, dark along the bottom and right -->
+    <pattern id="seams" x="40" y="40" width="90" height="90" patternUnits="userSpaceOnUse">
+      <path d="M0.5 89 L0.5 0.5 L89 0.5" fill="none" stroke="#fff" stroke-opacity="0.12" stroke-width="1"/>
+      <path d="M89.5 1 L89.5 89.5 L1 89.5" fill="none" stroke="#000" stroke-opacity="0.3" stroke-width="1"/>
+    </pattern>
+
+    <!-- Frame: lighter along the top where the light comes from -->
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="{{frame_light}}"/>
+      <stop offset="100%" stop-color="{{frame_dark}}"/>
+    </linearGradient>
+
+    <!-- Varnish: the soft reflection of a window across the whole board -->
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0.18" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#fff" stop-opacity="0.07"/>
+      <stop offset="0.36" stop-color="#fff" stop-opacity="0.03"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.06"/>
+      <stop offset="0.56" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- The board darkens slightly toward its edges -->
+    <radialGradient id="vignette" cx="45%" cy="40%" r="75%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.28"/>
+    </radialGradient>
+
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <clipPath id="outline">
+      <rect x="0" y="0" width="800" height="800" rx="16"/>
+    </clipPath>
+    <clipPath id="play-area">
+      <rect x="40" y="40" width="720" height="720"/>
+    </clipPath>
+    <!-- The four rails of the frame, mitered at the corners -->
+    <clipPath id="rails-across"><path d="M0 0 H800 L760 40 H40 Z M0 800 H800 L760 760 H40 Z"/></clipPath>
+    <clipPath id="rails-down"><path d="M0 0 V800 L40 760 V40 Z M800 0 V800 L760 760 V40 Z"/></clipPath>
+  </defs>
+
+  <!-- Frame: grain along each rail -->
+  <g clip-path="url(#outline)">
+    <rect x="0" y="0" width="800" height="800" fill="url(#frame)"/>
+    <g clip-path="url(#rails-across)">
+      <rect x="0" y="0" width="800" height="800" filter="url(#grain-frame)" opacity="0.7"/>
+    </g>
+    <g clip-path="url(#rails-down)">
+      <rect x="0" y="0" width="800" height="800" filter="url(#grain-frame-down)" opacity="0.7"/>
+    </g>
+    <!-- Each rail faces the light differently, and the miters show as fine seams -->
+    <path d="M0 0 H800 L760 40 H40 Z" fill="#fff" opacity="0.06"/>
+    <path d="M0 0 V800 L40 760 V40 Z" fill="#fff" opacity="0.02"/>
+    <path d="M800 0 V800 L760 760 V40 Z" fill="#000" opacity="0.12"/>
+    <path d="M0 800 H800 L760 760 H40 Z" fill="#000" opacity="0.2"/>
+    <path d="M0 0 L40 40 M800 0 L760 40 M0 800 L40 760 M800 800 L760 760" stroke="#000" stroke-opacity="0.4" stroke-width="1"/>
+  </g>
+
+  <!-- Stringing: a thin inlaid line between dark lines, just inside the frame -->
+  <rect x="30.5" y="30.5" width="739" height="739" fill="none" stroke="{{inlay_dark}}" stroke-width="1"/>
+  <rect x="32.5" y="32.5" width="735" height="735" fill="none" stroke="{{inlay}}" stroke-width="3"/>
+  <rect x="34.5" y="34.5" width="731" height="731" fill="none" stroke="{{inlay_dark}}" stroke-width="1"/>
+
+  <!-- Squares, each a separate piece of wood -->
+  <g>
+    {{squares}}
+  </g>
+  <rect x="0" y="0" width="800" height="800" rx="16" filter="url(#pores)" opacity="0.06"/>
+
+  <!-- Seams, lighting and the frame's shadow -->
+  <rect x="40" y="40" width="720" height="720" fill="url(#seams)"/>
+  <rect x="40" y="40" width="720" height="720" fill="url(#vignette)"/>
+  <g clip-path="url(#play-area)">
+    <rect x="40" y="40" width="720" height="720" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="10" filter="url(#soft)"/>
+  </g>
+  <rect x="0" y="0" width="800" height="800" rx="16" fill="url(#sheen)" opacity="{{sheen}}"/>
+
+  <!-- Frame bevels: the inner edge steps down into the board, the outer edge catches the light -->
+  <rect x="38.5" y="38.5" width="723" height="723" fill="none" stroke="#000" stroke-opacity="0.6" stroke-width="3"/>
+  <rect x="1.5" y="1.5" width="797" height="797" rx="15" fill="none" stroke="#fff" stroke-opacity="0.14" stroke-width="2"/>
+  <rect x="0.5" y="0.5" width="799" height="799" rx="16" fill="none" stroke="#000" stroke-opacity="0.5" stroke-width="1"/>
+</svg>

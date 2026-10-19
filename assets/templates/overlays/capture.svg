@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Capture landing square: a bracket in each corner, so jumps stand out from plain moves.
+       The colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+    <g id="corners" fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 26 L6 6 L26 6"/>
+      <path d="M74 6 L94 6 L94 26"/>
+      <path d="M94 74 L94 94 L74 94"/>
+      <path d="M26 94 L6 94 L6 74"/>
+    </g>
+  </defs>
+
+  <use href="#corners" stroke="#000" opacity="0.35" filter="url(#shadow)" transform="translate(1 1.5)"/>
+  <use href="#corners" stroke="{{color}}" opacity="0.9"/>
+  <!-- A soft dot in the middle as well, matching the plain move marker -->
+  <circle cx="50" cy="50" r="12" fill="{{color}}" opacity="0.7"/>
+</svg>

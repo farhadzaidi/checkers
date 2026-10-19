@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Settings: a gear. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="{{color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18.66 10.21 L21.28 10.53 L21.28 13.47 L18.66 13.79 L17.98 15.45 L19.60 17.53 L17.53 19.60 L15.45 17.98 L13.79 18.66 L13.47 21.28 L10.53 21.28 L10.21 18.66 L8.55 17.98 L6.47 19.60 L4.40 17.53 L6.02 15.45 L5.34 13.79 L2.72 13.47 L2.72 10.53 L5.34 10.21 L6.02 8.55 L4.40 6.47 L6.47 4.40 L8.55 6.02 L10.21 5.34 L10.53 2.72 L13.47 2.72 L13.79 5.34 L15.45 6.02 L17.53 4.40 L19.60 6.47 L17.98 8.55Z"/><circle cx="12" cy="12" r="3"/>
+  </g>
+</svg>

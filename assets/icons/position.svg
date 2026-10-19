@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Generated from assets/templates/icons/position.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- Start from position: a clipboard with a position written on it. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="4" width="14" height="17.5" rx="2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 11h6M9 15h4"/>
+  </g>
+</svg>

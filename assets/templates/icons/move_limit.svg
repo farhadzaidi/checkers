@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Draw by the move limit: an hourglass. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="{{color}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 2.5h12M6 21.5h12"/><path d="M7.5 2.5v3a5 5 0 0 0 2.2 4.1L12 12l2.3-2.4a5 5 0 0 0 2.2-4.1v-3"/><path d="M7.5 21.5v-3a5 5 0 0 1 2.2-4.1L12 12l2.3 2.4a5 5 0 0 1 2.2 4.1v3"/>
+  </g>
+</svg>

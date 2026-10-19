@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- Flat board, like a tournament vinyl or printed board: a 40px frame around an 8x8 grid
+       of 90px squares, light square in the top-left. Colour slots in double braces are
+       filled in by scripts/generate_assets.py for each flat style -->
+  <defs>
+    <!-- Base colours for the squares, one 2x2 tile repeated across the board -->
+    <pattern id="squares" x="40" y="40" width="180" height="180" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="90" height="90" fill="{{light}}"/>
+      <rect x="90" y="90" width="90" height="90" fill="{{light}}"/>
+      <rect x="90" y="0" width="90" height="90" fill="{{dark}}"/>
+      <rect x="0" y="90" width="90" height="90" fill="{{dark}}"/>
+    </pattern>
+
+    <!-- Fine matte texture, so the surface looks printed rather than perfectly flat -->
+    <filter id="texture" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="9"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+
+    <!-- Soft, wide blotches that break up perfectly even colour -->
+    <filter id="mottle" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="4"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+
+    <!-- Faint seam between squares -->
+    <pattern id="seams" x="40" y="40" width="90" height="90" patternUnits="userSpaceOnUse">
+      <path d="M0.5 89 L0.5 0.5 L89 0.5" fill="none" stroke="#fff" stroke-opacity="0.10" stroke-width="1"/>
+      <path d="M89.5 1 L89.5 89.5 L1 89.5" fill="none" stroke="#000" stroke-opacity="0.18" stroke-width="1"/>
+    </pattern>
+
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="{{frame_top}}"/>
+      <stop offset="100%" stop-color="{{frame_bottom}}"/>
+    </linearGradient>
+
+    <!-- Even light from above, a little brighter at the top-left -->
+    <radialGradient id="light" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.07"/>
+      <stop offset="55%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.20"/>
+    </radialGradient>
+
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <clipPath id="play-area">
+      <rect x="40" y="40" width="720" height="720"/>
+    </clipPath>
+  </defs>
+
+  <!-- Frame -->
+  <rect x="0" y="0" width="800" height="800" rx="16" fill="url(#frame)"/>
+
+  <!-- Squares with texture and mottling -->
+  <rect x="40" y="40" width="720" height="720" fill="url(#squares)"/>
+  <rect x="0" y="0" width="800" height="800" rx="16" filter="url(#mottle)" opacity="{{mottle}}"/>
+  <rect x="0" y="0" width="800" height="800" rx="16" filter="url(#texture)" opacity="{{texture}}"/>
+
+  <!-- Seams, lighting and the frame's shadow -->
+  <rect x="40" y="40" width="720" height="720" fill="url(#seams)"/>
+  <rect x="40" y="40" width="720" height="720" fill="url(#light)"/>
+  <g clip-path="url(#play-area)">
+    <rect x="40" y="40" width="720" height="720" fill="none" stroke="#000" stroke-opacity="0.45" stroke-width="8" filter="url(#soft)"/>
+  </g>
+
+  <!-- Frame bevels -->
+  <rect x="38.5" y="38.5" width="723" height="723" fill="none" stroke="#000" stroke-opacity="0.5" stroke-width="3"/>
+  <rect x="1.5" y="1.5" width="797" height="797" rx="15" fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="2"/>
+  <rect x="0.5" y="0.5" width="799" height="799" rx="16" fill="none" stroke="#000" stroke-opacity="0.5" stroke-width="1"/>
+</svg>

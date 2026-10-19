@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Generated from assets/templates/icons/home.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- Home: a house, for the main menu. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 8.5V20h13V8.5"/><path d="M10 20v-5.5h4V20"/>
+  </g>
+</svg>

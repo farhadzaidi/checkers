@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Generated from assets/templates/icons/play.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- Play: a triangle pointing right, for Play and Start. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 4.5v15l12-7.5Z"/>
+  </g>
+</svg>

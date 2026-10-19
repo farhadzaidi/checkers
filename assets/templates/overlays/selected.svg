@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Selected square: a soft glow from the edges inward, behind the picked-up piece.
+       The colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <defs>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <clipPath id="square">
+      <rect x="0" y="0" width="100" height="100"/>
+    </clipPath>
+  </defs>
+
+  <!-- A light wash over the whole square -->
+  <rect x="0" y="0" width="100" height="100" fill="{{color}}" opacity="0.22"/>
+
+  <!-- A thick stroke along the edges, blurred inward into a glow -->
+  <g clip-path="url(#square)">
+    <rect x="0" y="0" width="100" height="100" fill="none" stroke="{{color}}" stroke-width="16" opacity="0.85" filter="url(#glow)"/>
+  </g>
+  <rect x="1.5" y="1.5" width="97" height="97" fill="none" stroke="{{color}}" stroke-width="3" opacity="0.9"/>
+</svg>

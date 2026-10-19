@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- Generated from assets/templates/boards/wood.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- Wooden board: a 40px mitered frame around an 8x8 grid of 90px squares, light square in
+       the top-left. Colour slots in double braces come from the style's palette in
+       scripts/generate_assets.py; <svg x="40" y="40" width="90" height="90"><rect width="90" height="90" fill="#d9bc8c"/><rect x="2730" y="3560" width="90" height="90" filter="url(#grain-light)" transform="translate(-2730 -3560)" opacity="0.53"/></svg>
+    <svg x="130" y="40" width="90" height="90"><rect width="90" height="90" fill="#664125"/><rect x="1050" y="2440" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1050 -2440)" opacity="0.63"/></svg>
+    <svg x="220" y="40" width="90" height="90"><rect width="90" height="90" fill="#dfbf8e"/><rect x="200" y="2660" width="90" height="90" filter="url(#grain-light)" transform="translate(-200 -2660)" opacity="0.51"/></svg>
+    <svg x="310" y="40" width="90" height="90"><rect width="90" height="90" fill="#5b3823"/><rect x="700" y="3480" width="90" height="90" filter="url(#grain-dark)" transform="translate(-700 -3480)" opacity="0.62"/></svg>
+    <svg x="400" y="40" width="90" height="90"><rect width="90" height="90" fill="#d9b687"/><rect x="10" y="2760" width="90" height="90" filter="url(#grain-light)" transform="translate(-10 -2760)" opacity="0.58"/></svg>
+    <svg x="490" y="40" width="90" height="90"><rect width="90" height="90" fill="#593a23"/><rect x="1940" y="520" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1940 -520)" opacity="0.75"/></svg>
+    <svg x="580" y="40" width="90" height="90"><rect width="90" height="90" fill="#dcc190"/><rect x="3560" y="50" width="90" height="90" filter="url(#grain-light)" transform="translate(-3560 -50)" opacity="0.50"/></svg>
+    <svg x="670" y="40" width="90" height="90"><rect width="90" height="90" fill="#5d3920"/><rect x="3640" y="3480" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3640 -3480)" opacity="0.63"/></svg>
+    <svg x="40" y="130" width="90" height="90"><rect width="90" height="90" fill="#633f25"/><rect x="3950" y="3750" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3950 -3750)" opacity="0.67"/></svg>
+    <svg x="130" y="130" width="90" height="90"><rect width="90" height="90" fill="#d9bb86"/><rect x="3310" y="3980" width="90" height="90" filter="url(#grain-light)" transform="translate(-3310 -3980)" opacity="0.49"/></svg>
+    <svg x="220" y="130" width="90" height="90"><rect width="90" height="90" fill="#5a3a21"/><rect x="1260" y="2250" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1260 -2250)" opacity="0.70"/></svg>
+    <svg x="310" y="130" width="90" height="90"><rect width="90" height="90" fill="#dfbd8e"/><rect x="2020" y="3770" width="90" height="90" filter="url(#grain-light)" transform="translate(-2020 -3770)" opacity="0.54"/></svg>
+    <svg x="400" y="130" width="90" height="90"><rect width="90" height="90" fill="#5c3922"/><rect x="2070" y="2520" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2070 -2520)" opacity="0.61"/></svg>
+    <svg x="490" y="130" width="90" height="90"><rect width="90" height="90" fill="#e0bd8b"/><rect x="1950" y="1030" width="90" height="90" filter="url(#grain-light)" transform="translate(-1950 -1030)" opacity="0.59"/></svg>
+    <svg x="580" y="130" width="90" height="90"><rect width="90" height="90" fill="#5d3823"/><rect x="2440" y="1570" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2440 -1570)" opacity="0.75"/></svg>
+    <svg x="670" y="130" width="90" height="90"><rect width="90" height="90" fill="#e0bf8c"/><rect x="2320" y="3970" width="90" height="90" filter="url(#grain-light)" transform="translate(-2320 -3970)" opacity="0.60"/></svg>
+    <svg x="40" y="220" width="90" height="90"><rect width="90" height="90" fill="#dbbd85"/><rect x="1340" y="2430" width="90" height="90" filter="url(#grain-light)" transform="translate(-1340 -2430)" opacity="0.51"/></svg>
+    <svg x="130" y="220" width="90" height="90"><rect width="90" height="90" fill="#603d23"/><rect x="2640" y="1350" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2640 -1350)" opacity="0.72"/></svg>
+    <svg x="220" y="220" width="90" height="90"><rect width="90" height="90" fill="#d9bc8b"/><rect x="1800" y="1460" width="90" height="90" filter="url(#grain-light)" transform="translate(-1800 -1460)" opacity="0.47"/></svg>
+    <svg x="310" y="220" width="90" height="90"><rect width="90" height="90" fill="#5a3922"/><rect x="3700" y="10" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3700 -10)" opacity="0.69"/></svg>
+    <svg x="400" y="220" width="90" height="90"><rect width="90" height="90" fill="#d7b686"/><rect x="3770" y="80" width="90" height="90" filter="url(#grain-light)" transform="translate(-3770 -80)" opacity="0.49"/></svg>
+    <svg x="490" y="220" width="90" height="90"><rect width="90" height="90" fill="#623b23"/><rect x="1350" y="1670" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1350 -1670)" opacity="0.70"/></svg>
+    <svg x="580" y="220" width="90" height="90"><rect width="90" height="90" fill="#ddbe88"/><rect x="3690" y="450" width="90" height="90" filter="url(#grain-light)" transform="translate(-3690 -450)" opacity="0.60"/></svg>
+    <svg x="670" y="220" width="90" height="90"><rect width="90" height="90" fill="#653f21"/><rect x="1070" y="3880" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1070 -3880)" opacity="0.69"/></svg>
+    <svg x="40" y="310" width="90" height="90"><rect width="90" height="90" fill="#684223"/><rect x="990" y="3810" width="90" height="90" filter="url(#grain-dark)" transform="translate(-990 -3810)" opacity="0.73"/></svg>
+    <svg x="130" y="310" width="90" height="90"><rect width="90" height="90" fill="#e0c18d"/><rect x="800" y="3560" width="90" height="90" filter="url(#grain-light)" transform="translate(-800 -3560)" opacity="0.51"/></svg>
+    <svg x="220" y="310" width="90" height="90"><rect width="90" height="90" fill="#603e26"/><rect x="860" y="2590" width="90" height="90" filter="url(#grain-dark)" transform="translate(-860 -2590)" opacity="0.75"/></svg>
+    <svg x="310" y="310" width="90" height="90"><rect width="90" height="90" fill="#d8b585"/><rect x="2550" y="1730" width="90" height="90" filter="url(#grain-light)" transform="translate(-2550 -1730)" opacity="0.55"/></svg>
+    <svg x="400" y="310" width="90" height="90"><rect width="90" height="90" fill="#643921"/><rect x="2230" y="3090" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2230 -3090)" opacity="0.68"/></svg>
+    <svg x="490" y="310" width="90" height="90"><rect width="90" height="90" fill="#dbbb8b"/><rect x="3400" y="670" width="90" height="90" filter="url(#grain-light)" transform="translate(-3400 -670)" opacity="0.48"/></svg>
+    <svg x="580" y="310" width="90" height="90"><rect width="90" height="90" fill="#5e3720"/><rect x="3200" y="2960" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3200 -2960)" opacity="0.69"/></svg>
+    <svg x="670" y="310" width="90" height="90"><rect width="90" height="90" fill="#d9ba80"/><rect x="200" y="1440" width="90" height="90" filter="url(#grain-light)" transform="translate(-200 -1440)" opacity="0.53"/></svg>
+    <svg x="40" y="400" width="90" height="90"><rect width="90" height="90" fill="#d7b484"/><rect x="3790" y="3450" width="90" height="90" filter="url(#grain-light)" transform="translate(-3790 -3450)" opacity="0.49"/></svg>
+    <svg x="130" y="400" width="90" height="90"><rect width="90" height="90" fill="#653c21"/><rect x="2680" y="20" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2680 -20)" opacity="0.62"/></svg>
+    <svg x="220" y="400" width="90" height="90"><rect width="90" height="90" fill="#dcbe96"/><rect x="1270" y="3330" width="90" height="90" filter="url(#grain-light)" transform="translate(-1270 -3330)" opacity="0.58"/></svg>
+    <svg x="310" y="400" width="90" height="90"><rect width="90" height="90" fill="#5f3c22"/><rect x="3970" y="3220" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3970 -3220)" opacity="0.68"/></svg>
+    <svg x="400" y="400" width="90" height="90"><rect width="90" height="90" fill="#dcbb8d"/><rect x="1170" y="3290" width="90" height="90" filter="url(#grain-light)" transform="translate(-1170 -3290)" opacity="0.54"/></svg>
+    <svg x="490" y="400" width="90" height="90"><rect width="90" height="90" fill="#553420"/><rect x="1120" y="370" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1120 -370)" opacity="0.62"/></svg>
+    <svg x="580" y="400" width="90" height="90"><rect width="90" height="90" fill="#d9ba8b"/><rect x="3360" y="380" width="90" height="90" filter="url(#grain-light)" transform="translate(-3360 -380)" opacity="0.56"/></svg>
+    <svg x="670" y="400" width="90" height="90"><rect width="90" height="90" fill="#663f26"/><rect x="3260" y="3870" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3260 -3870)" opacity="0.76"/></svg>
+    <svg x="40" y="490" width="90" height="90"><rect width="90" height="90" fill="#5a3a22"/><rect x="90" y="1670" width="90" height="90" filter="url(#grain-dark)" transform="translate(-90 -1670)" opacity="0.72"/></svg>
+    <svg x="130" y="490" width="90" height="90"><rect width="90" height="90" fill="#d7b786"/><rect x="2570" y="90" width="90" height="90" filter="url(#grain-light)" transform="translate(-2570 -90)" opacity="0.48"/></svg>
+    <svg x="220" y="490" width="90" height="90"><rect width="90" height="90" fill="#5e381f"/><rect x="2220" y="1650" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2220 -1650)" opacity="0.64"/></svg>
+    <svg x="310" y="490" width="90" height="90"><rect width="90" height="90" fill="#dbbc8f"/><rect x="3000" y="2280" width="90" height="90" filter="url(#grain-light)" transform="translate(-3000 -2280)" opacity="0.58"/></svg>
+    <svg x="400" y="490" width="90" height="90"><rect width="90" height="90" fill="#563922"/><rect x="3070" y="2430" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3070 -2430)" opacity="0.72"/></svg>
+    <svg x="490" y="490" width="90" height="90"><rect width="90" height="90" fill="#dab889"/><rect x="150" y="3120" width="90" height="90" filter="url(#grain-light)" transform="translate(-150 -3120)" opacity="0.52"/></svg>
+    <svg x="580" y="490" width="90" height="90"><rect width="90" height="90" fill="#613a23"/><rect x="2800" y="1200" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2800 -1200)" opacity="0.67"/></svg>
+    <svg x="670" y="490" width="90" height="90"><rect width="90" height="90" fill="#dfbf8a"/><rect x="570" y="590" width="90" height="90" filter="url(#grain-light)" transform="translate(-570 -590)" opacity="0.54"/></svg>
+    <svg x="40" y="580" width="90" height="90"><rect width="90" height="90" fill="#e0c390"/><rect x="270" y="3740" width="90" height="90" filter="url(#grain-light)" transform="translate(-270 -3740)" opacity="0.53"/></svg>
+    <svg x="130" y="580" width="90" height="90"><rect width="90" height="90" fill="#5f3c23"/><rect x="3170" y="3300" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3170 -3300)" opacity="0.68"/></svg>
+    <svg x="220" y="580" width="90" height="90"><rect width="90" height="90" fill="#debe8c"/><rect x="3050" y="3200" width="90" height="90" filter="url(#grain-light)" transform="translate(-3050 -3200)" opacity="0.57"/></svg>
+    <svg x="310" y="580" width="90" height="90"><rect width="90" height="90" fill="#654227"/><rect x="1530" y="1050" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1530 -1050)" opacity="0.72"/></svg>
+    <svg x="400" y="580" width="90" height="90"><rect width="90" height="90" fill="#ddb681"/><rect x="2050" y="2780" width="90" height="90" filter="url(#grain-light)" transform="translate(-2050 -2780)" opacity="0.50"/></svg>
+    <svg x="490" y="580" width="90" height="90"><rect width="90" height="90" fill="#643f23"/><rect x="3260" y="280" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3260 -280)" opacity="0.77"/></svg>
+    <svg x="580" y="580" width="90" height="90"><rect width="90" height="90" fill="#dec28d"/><rect x="1970" y="1340" width="90" height="90" filter="url(#grain-light)" transform="translate(-1970 -1340)" opacity="0.54"/></svg>
+    <svg x="670" y="580" width="90" height="90"><rect width="90" height="90" fill="#56341e"/><rect x="3640" y="1660" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3640 -1660)" opacity="0.69"/></svg>
+    <svg x="40" y="670" width="90" height="90"><rect width="90" height="90" fill="#57371e"/><rect x="2410" y="3270" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2410 -3270)" opacity="0.72"/></svg>
+    <svg x="130" y="670" width="90" height="90"><rect width="90" height="90" fill="#ddbe88"/><rect x="2480" y="1710" width="90" height="90" filter="url(#grain-light)" transform="translate(-2480 -1710)" opacity="0.53"/></svg>
+    <svg x="220" y="670" width="90" height="90"><rect width="90" height="90" fill="#633b25"/><rect x="1230" y="270" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1230 -270)" opacity="0.70"/></svg>
+    <svg x="310" y="670" width="90" height="90"><rect width="90" height="90" fill="#e0c28c"/><rect x="470" y="750" width="90" height="90" filter="url(#grain-light)" transform="translate(-470 -750)" opacity="0.53"/></svg>
+    <svg x="400" y="670" width="90" height="90"><rect width="90" height="90" fill="#5d371f"/><rect x="3940" y="1120" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3940 -1120)" opacity="0.70"/></svg>
+    <svg x="490" y="670" width="90" height="90"><rect width="90" height="90" fill="#dbb584"/><rect x="1950" y="1980" width="90" height="90" filter="url(#grain-light)" transform="translate(-1950 -1980)" opacity="0.48"/></svg>
+    <svg x="580" y="670" width="90" height="90"><rect width="90" height="90" fill="#5e3722"/><rect x="3380" y="3820" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3380 -3820)" opacity="0.67"/></svg>
+    <svg x="670" y="670" width="90" height="90"><rect width="90" height="90" fill="#ddb682"/><rect x="670" y="3310" width="90" height="90" filter="url(#grain-light)" transform="translate(-670 -3310)" opacity="0.52"/></svg> is drawn there, one piece of wood per square -->
+  <defs>
+    <!-- Wood grain, drawn in a darker shade of the wood: across on light squares, down on dark
+         ones (the noise is stretched each way, since renderers don't rotate it).
+         Fine streaks, plus growth rings: contour lines of a slow, stretched noise, which
+         give the arches of flat-sawn timber, softened a little -->
+    <filter id="grain-light" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.005 0.15" numOctaves="4" seed="11"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="streaks"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.004 0.03" numOctaves="2" seed="17"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0"/>
+      </feComponentTransfer>
+      <feGaussianBlur stdDeviation="0.4" result="rings"/>
+      <feComposite in="streaks" in2="rings" operator="arithmetic" k2="1" k3="0.55" result="marks"/>
+      <feFlood flood-color="#ab692c"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+    <filter id="grain-dark" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.15 0.005" numOctaves="4" seed="23"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="streaks"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.004" numOctaves="2" seed="29"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0 .1 .8 .2 0 0"/>
+      </feComponentTransfer>
+      <feGaussianBlur stdDeviation="0.4" result="rings"/>
+      <feComposite in="streaks" in2="rings" operator="arithmetic" k2="1" k3="0.45" result="marks"/>
+      <feFlood flood-color="#000000"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+    <filter id="grain-frame" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.003 0.14" numOctaves="4" seed="31"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="marks"/>
+      <feFlood flood-color="#000000"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+    <filter id="grain-frame-down" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.14 0.003" numOctaves="4" seed="31"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.6 0 0 1.5" result="marks"/>
+      <feFlood flood-color="#000000"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+
+    <!-- Fine pores over everything, so no surface looks perfectly smooth -->
+    <filter id="pores" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="5"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+
+    <!-- Seam between squares: light along the top and left, dark along the bottom and right -->
+    <pattern id="seams" x="40" y="40" width="90" height="90" patternUnits="userSpaceOnUse">
+      <path d="M0.5 89 L0.5 0.5 L89 0.5" fill="none" stroke="#fff" stroke-opacity="0.12" stroke-width="1"/>
+      <path d="M89.5 1 L89.5 89.5 L1 89.5" fill="none" stroke="#000" stroke-opacity="0.3" stroke-width="1"/>
+    </pattern>
+
+    <!-- Frame: lighter along the top where the light comes from -->
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#613c1f"/>
+      <stop offset="100%" stop-color="#23140c"/>
+    </linearGradient>
+
+    <!-- Varnish: the soft reflection of a window across the whole board -->
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0.18" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#fff" stop-opacity="0.07"/>
+      <stop offset="0.36" stop-color="#fff" stop-opacity="0.03"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.06"/>
+      <stop offset="0.56" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- The board darkens slightly toward its edges -->
+    <radialGradient id="vignette" cx="45%" cy="40%" r="75%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.28"/>
+    </radialGradient>
+
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <clipPath id="outline">
+      <rect x="0" y="0" width="800" height="800" rx="16"/>
+    </clipPath>
+    <clipPath id="play-area">
+      <rect x="40" y="40" width="720" height="720"/>
+    </clipPath>
+    <!-- The four rails of the frame, mitered at the corners -->
+    <clipPath id="rails-across"><path d="M0 0 H800 L760 40 H40 Z M0 800 H800 L760 760 H40 Z"/></clipPath>
+    <clipPath id="rails-down"><path d="M0 0 V800 L40 760 V40 Z M800 0 V800 L760 760 V40 Z"/></clipPath>
+  </defs>
+
+  <!-- Frame: grain along each rail -->
+  <g clip-path="url(#outline)">
+    <rect x="0" y="0" width="800" height="800" fill="url(#frame)"/>
+    <g clip-path="url(#rails-across)">
+      <rect x="0" y="0" width="800" height="800" filter="url(#grain-frame)" opacity="0.7"/>
+    </g>
+    <g clip-path="url(#rails-down)">
+      <rect x="0" y="0" width="800" height="800" filter="url(#grain-frame-down)" opacity="0.7"/>
+    </g>
+    <!-- Each rail faces the light differently, and the miters show as fine seams -->
+    <path d="M0 0 H800 L760 40 H40 Z" fill="#fff" opacity="0.06"/>
+    <path d="M0 0 V800 L40 760 V40 Z" fill="#fff" opacity="0.02"/>
+    <path d="M800 0 V800 L760 760 V40 Z" fill="#000" opacity="0.12"/>
+    <path d="M0 800 H800 L760 760 H40 Z" fill="#000" opacity="0.2"/>
+    <path d="M0 0 L40 40 M800 0 L760 40 M0 800 L40 760 M800 800 L760 760" stroke="#000" stroke-opacity="0.4" stroke-width="1"/>
+  </g>
+
+  <!-- Stringing: a thin inlaid line between dark lines, just inside the frame -->
+  <rect x="30.5" y="30.5" width="739" height="739" fill="none" stroke="#8c5d26" stroke-width="1"/>
+  <rect x="32.5" y="32.5" width="735" height="735" fill="none" stroke="#e9d6ae" stroke-width="3"/>
+  <rect x="34.5" y="34.5" width="731" height="731" fill="none" stroke="#8c5d26" stroke-width="1"/>
+
+  <!-- Squares, each a separate piece of wood -->
+  <g>
+    <svg x="40" y="40" width="90" height="90"><rect width="90" height="90" fill="#d9bc8c"/><rect x="2730" y="3560" width="90" height="90" filter="url(#grain-light)" transform="translate(-2730 -3560)" opacity="0.53"/></svg>
+    <svg x="130" y="40" width="90" height="90"><rect width="90" height="90" fill="#664125"/><rect x="1050" y="2440" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1050 -2440)" opacity="0.63"/></svg>
+    <svg x="220" y="40" width="90" height="90"><rect width="90" height="90" fill="#dfbf8e"/><rect x="200" y="2660" width="90" height="90" filter="url(#grain-light)" transform="translate(-200 -2660)" opacity="0.51"/></svg>
+    <svg x="310" y="40" width="90" height="90"><rect width="90" height="90" fill="#5b3823"/><rect x="700" y="3480" width="90" height="90" filter="url(#grain-dark)" transform="translate(-700 -3480)" opacity="0.62"/></svg>
+    <svg x="400" y="40" width="90" height="90"><rect width="90" height="90" fill="#d9b687"/><rect x="10" y="2760" width="90" height="90" filter="url(#grain-light)" transform="translate(-10 -2760)" opacity="0.58"/></svg>
+    <svg x="490" y="40" width="90" height="90"><rect width="90" height="90" fill="#593a23"/><rect x="1940" y="520" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1940 -520)" opacity="0.75"/></svg>
+    <svg x="580" y="40" width="90" height="90"><rect width="90" height="90" fill="#dcc190"/><rect x="3560" y="50" width="90" height="90" filter="url(#grain-light)" transform="translate(-3560 -50)" opacity="0.50"/></svg>
+    <svg x="670" y="40" width="90" height="90"><rect width="90" height="90" fill="#5d3920"/><rect x="3640" y="3480" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3640 -3480)" opacity="0.63"/></svg>
+    <svg x="40" y="130" width="90" height="90"><rect width="90" height="90" fill="#633f25"/><rect x="3950" y="3750" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3950 -3750)" opacity="0.67"/></svg>
+    <svg x="130" y="130" width="90" height="90"><rect width="90" height="90" fill="#d9bb86"/><rect x="3310" y="3980" width="90" height="90" filter="url(#grain-light)" transform="translate(-3310 -3980)" opacity="0.49"/></svg>
+    <svg x="220" y="130" width="90" height="90"><rect width="90" height="90" fill="#5a3a21"/><rect x="1260" y="2250" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1260 -2250)" opacity="0.70"/></svg>
+    <svg x="310" y="130" width="90" height="90"><rect width="90" height="90" fill="#dfbd8e"/><rect x="2020" y="3770" width="90" height="90" filter="url(#grain-light)" transform="translate(-2020 -3770)" opacity="0.54"/></svg>
+    <svg x="400" y="130" width="90" height="90"><rect width="90" height="90" fill="#5c3922"/><rect x="2070" y="2520" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2070 -2520)" opacity="0.61"/></svg>
+    <svg x="490" y="130" width="90" height="90"><rect width="90" height="90" fill="#e0bd8b"/><rect x="1950" y="1030" width="90" height="90" filter="url(#grain-light)" transform="translate(-1950 -1030)" opacity="0.59"/></svg>
+    <svg x="580" y="130" width="90" height="90"><rect width="90" height="90" fill="#5d3823"/><rect x="2440" y="1570" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2440 -1570)" opacity="0.75"/></svg>
+    <svg x="670" y="130" width="90" height="90"><rect width="90" height="90" fill="#e0bf8c"/><rect x="2320" y="3970" width="90" height="90" filter="url(#grain-light)" transform="translate(-2320 -3970)" opacity="0.60"/></svg>
+    <svg x="40" y="220" width="90" height="90"><rect width="90" height="90" fill="#dbbd85"/><rect x="1340" y="2430" width="90" height="90" filter="url(#grain-light)" transform="translate(-1340 -2430)" opacity="0.51"/></svg>
+    <svg x="130" y="220" width="90" height="90"><rect width="90" height="90" fill="#603d23"/><rect x="2640" y="1350" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2640 -1350)" opacity="0.72"/></svg>
+    <svg x="220" y="220" width="90" height="90"><rect width="90" height="90" fill="#d9bc8b"/><rect x="1800" y="1460" width="90" height="90" filter="url(#grain-light)" transform="translate(-1800 -1460)" opacity="0.47"/></svg>
+    <svg x="310" y="220" width="90" height="90"><rect width="90" height="90" fill="#5a3922"/><rect x="3700" y="10" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3700 -10)" opacity="0.69"/></svg>
+    <svg x="400" y="220" width="90" height="90"><rect width="90" height="90" fill="#d7b686"/><rect x="3770" y="80" width="90" height="90" filter="url(#grain-light)" transform="translate(-3770 -80)" opacity="0.49"/></svg>
+    <svg x="490" y="220" width="90" height="90"><rect width="90" height="90" fill="#623b23"/><rect x="1350" y="1670" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1350 -1670)" opacity="0.70"/></svg>
+    <svg x="580" y="220" width="90" height="90"><rect width="90" height="90" fill="#ddbe88"/><rect x="3690" y="450" width="90" height="90" filter="url(#grain-light)" transform="translate(-3690 -450)" opacity="0.60"/></svg>
+    <svg x="670" y="220" width="90" height="90"><rect width="90" height="90" fill="#653f21"/><rect x="1070" y="3880" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1070 -3880)" opacity="0.69"/></svg>
+    <svg x="40" y="310" width="90" height="90"><rect width="90" height="90" fill="#684223"/><rect x="990" y="3810" width="90" height="90" filter="url(#grain-dark)" transform="translate(-990 -3810)" opacity="0.73"/></svg>
+    <svg x="130" y="310" width="90" height="90"><rect width="90" height="90" fill="#e0c18d"/><rect x="800" y="3560" width="90" height="90" filter="url(#grain-light)" transform="translate(-800 -3560)" opacity="0.51"/></svg>
+    <svg x="220" y="310" width="90" height="90"><rect width="90" height="90" fill="#603e26"/><rect x="860" y="2590" width="90" height="90" filter="url(#grain-dark)" transform="translate(-860 -2590)" opacity="0.75"/></svg>
+    <svg x="310" y="310" width="90" height="90"><rect width="90" height="90" fill="#d8b585"/><rect x="2550" y="1730" width="90" height="90" filter="url(#grain-light)" transform="translate(-2550 -1730)" opacity="0.55"/></svg>
+    <svg x="400" y="310" width="90" height="90"><rect width="90" height="90" fill="#643921"/><rect x="2230" y="3090" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2230 -3090)" opacity="0.68"/></svg>
+    <svg x="490" y="310" width="90" height="90"><rect width="90" height="90" fill="#dbbb8b"/><rect x="3400" y="670" width="90" height="90" filter="url(#grain-light)" transform="translate(-3400 -670)" opacity="0.48"/></svg>
+    <svg x="580" y="310" width="90" height="90"><rect width="90" height="90" fill="#5e3720"/><rect x="3200" y="2960" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3200 -2960)" opacity="0.69"/></svg>
+    <svg x="670" y="310" width="90" height="90"><rect width="90" height="90" fill="#d9ba80"/><rect x="200" y="1440" width="90" height="90" filter="url(#grain-light)" transform="translate(-200 -1440)" opacity="0.53"/></svg>
+    <svg x="40" y="400" width="90" height="90"><rect width="90" height="90" fill="#d7b484"/><rect x="3790" y="3450" width="90" height="90" filter="url(#grain-light)" transform="translate(-3790 -3450)" opacity="0.49"/></svg>
+    <svg x="130" y="400" width="90" height="90"><rect width="90" height="90" fill="#653c21"/><rect x="2680" y="20" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2680 -20)" opacity="0.62"/></svg>
+    <svg x="220" y="400" width="90" height="90"><rect width="90" height="90" fill="#dcbe96"/><rect x="1270" y="3330" width="90" height="90" filter="url(#grain-light)" transform="translate(-1270 -3330)" opacity="0.58"/></svg>
+    <svg x="310" y="400" width="90" height="90"><rect width="90" height="90" fill="#5f3c22"/><rect x="3970" y="3220" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3970 -3220)" opacity="0.68"/></svg>
+    <svg x="400" y="400" width="90" height="90"><rect width="90" height="90" fill="#dcbb8d"/><rect x="1170" y="3290" width="90" height="90" filter="url(#grain-light)" transform="translate(-1170 -3290)" opacity="0.54"/></svg>
+    <svg x="490" y="400" width="90" height="90"><rect width="90" height="90" fill="#553420"/><rect x="1120" y="370" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1120 -370)" opacity="0.62"/></svg>
+    <svg x="580" y="400" width="90" height="90"><rect width="90" height="90" fill="#d9ba8b"/><rect x="3360" y="380" width="90" height="90" filter="url(#grain-light)" transform="translate(-3360 -380)" opacity="0.56"/></svg>
+    <svg x="670" y="400" width="90" height="90"><rect width="90" height="90" fill="#663f26"/><rect x="3260" y="3870" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3260 -3870)" opacity="0.76"/></svg>
+    <svg x="40" y="490" width="90" height="90"><rect width="90" height="90" fill="#5a3a22"/><rect x="90" y="1670" width="90" height="90" filter="url(#grain-dark)" transform="translate(-90 -1670)" opacity="0.72"/></svg>
+    <svg x="130" y="490" width="90" height="90"><rect width="90" height="90" fill="#d7b786"/><rect x="2570" y="90" width="90" height="90" filter="url(#grain-light)" transform="translate(-2570 -90)" opacity="0.48"/></svg>
+    <svg x="220" y="490" width="90" height="90"><rect width="90" height="90" fill="#5e381f"/><rect x="2220" y="1650" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2220 -1650)" opacity="0.64"/></svg>
+    <svg x="310" y="490" width="90" height="90"><rect width="90" height="90" fill="#dbbc8f"/><rect x="3000" y="2280" width="90" height="90" filter="url(#grain-light)" transform="translate(-3000 -2280)" opacity="0.58"/></svg>
+    <svg x="400" y="490" width="90" height="90"><rect width="90" height="90" fill="#563922"/><rect x="3070" y="2430" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3070 -2430)" opacity="0.72"/></svg>
+    <svg x="490" y="490" width="90" height="90"><rect width="90" height="90" fill="#dab889"/><rect x="150" y="3120" width="90" height="90" filter="url(#grain-light)" transform="translate(-150 -3120)" opacity="0.52"/></svg>
+    <svg x="580" y="490" width="90" height="90"><rect width="90" height="90" fill="#613a23"/><rect x="2800" y="1200" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2800 -1200)" opacity="0.67"/></svg>
+    <svg x="670" y="490" width="90" height="90"><rect width="90" height="90" fill="#dfbf8a"/><rect x="570" y="590" width="90" height="90" filter="url(#grain-light)" transform="translate(-570 -590)" opacity="0.54"/></svg>
+    <svg x="40" y="580" width="90" height="90"><rect width="90" height="90" fill="#e0c390"/><rect x="270" y="3740" width="90" height="90" filter="url(#grain-light)" transform="translate(-270 -3740)" opacity="0.53"/></svg>
+    <svg x="130" y="580" width="90" height="90"><rect width="90" height="90" fill="#5f3c23"/><rect x="3170" y="3300" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3170 -3300)" opacity="0.68"/></svg>
+    <svg x="220" y="580" width="90" height="90"><rect width="90" height="90" fill="#debe8c"/><rect x="3050" y="3200" width="90" height="90" filter="url(#grain-light)" transform="translate(-3050 -3200)" opacity="0.57"/></svg>
+    <svg x="310" y="580" width="90" height="90"><rect width="90" height="90" fill="#654227"/><rect x="1530" y="1050" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1530 -1050)" opacity="0.72"/></svg>
+    <svg x="400" y="580" width="90" height="90"><rect width="90" height="90" fill="#ddb681"/><rect x="2050" y="2780" width="90" height="90" filter="url(#grain-light)" transform="translate(-2050 -2780)" opacity="0.50"/></svg>
+    <svg x="490" y="580" width="90" height="90"><rect width="90" height="90" fill="#643f23"/><rect x="3260" y="280" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3260 -280)" opacity="0.77"/></svg>
+    <svg x="580" y="580" width="90" height="90"><rect width="90" height="90" fill="#dec28d"/><rect x="1970" y="1340" width="90" height="90" filter="url(#grain-light)" transform="translate(-1970 -1340)" opacity="0.54"/></svg>
+    <svg x="670" y="580" width="90" height="90"><rect width="90" height="90" fill="#56341e"/><rect x="3640" y="1660" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3640 -1660)" opacity="0.69"/></svg>
+    <svg x="40" y="670" width="90" height="90"><rect width="90" height="90" fill="#57371e"/><rect x="2410" y="3270" width="90" height="90" filter="url(#grain-dark)" transform="translate(-2410 -3270)" opacity="0.72"/></svg>
+    <svg x="130" y="670" width="90" height="90"><rect width="90" height="90" fill="#ddbe88"/><rect x="2480" y="1710" width="90" height="90" filter="url(#grain-light)" transform="translate(-2480 -1710)" opacity="0.53"/></svg>
+    <svg x="220" y="670" width="90" height="90"><rect width="90" height="90" fill="#633b25"/><rect x="1230" y="270" width="90" height="90" filter="url(#grain-dark)" transform="translate(-1230 -270)" opacity="0.70"/></svg>
+    <svg x="310" y="670" width="90" height="90"><rect width="90" height="90" fill="#e0c28c"/><rect x="470" y="750" width="90" height="90" filter="url(#grain-light)" transform="translate(-470 -750)" opacity="0.53"/></svg>
+    <svg x="400" y="670" width="90" height="90"><rect width="90" height="90" fill="#5d371f"/><rect x="3940" y="1120" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3940 -1120)" opacity="0.70"/></svg>
+    <svg x="490" y="670" width="90" height="90"><rect width="90" height="90" fill="#dbb584"/><rect x="1950" y="1980" width="90" height="90" filter="url(#grain-light)" transform="translate(-1950 -1980)" opacity="0.48"/></svg>
+    <svg x="580" y="670" width="90" height="90"><rect width="90" height="90" fill="#5e3722"/><rect x="3380" y="3820" width="90" height="90" filter="url(#grain-dark)" transform="translate(-3380 -3820)" opacity="0.67"/></svg>
+    <svg x="670" y="670" width="90" height="90"><rect width="90" height="90" fill="#ddb682"/><rect x="670" y="3310" width="90" height="90" filter="url(#grain-light)" transform="translate(-670 -3310)" opacity="0.52"/></svg>
+  </g>
+  <rect x="0" y="0" width="800" height="800" rx="16" filter="url(#pores)" opacity="0.06"/>
+
+  <!-- Seams, lighting and the frame's shadow -->
+  <rect x="40" y="40" width="720" height="720" fill="url(#seams)"/>
+  <rect x="40" y="40" width="720" height="720" fill="url(#vignette)"/>
+  <g clip-path="url(#play-area)">
+    <rect x="40" y="40" width="720" height="720" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="10" filter="url(#soft)"/>
+  </g>
+  <rect x="0" y="0" width="800" height="800" rx="16" fill="url(#sheen)" opacity="1"/>
+
+  <!-- Frame bevels: the inner edge steps down into the board, the outer edge catches the light -->
+  <rect x="38.5" y="38.5" width="723" height="723" fill="none" stroke="#000" stroke-opacity="0.6" stroke-width="3"/>
+  <rect x="1.5" y="1.5" width="797" height="797" rx="15" fill="none" stroke="#fff" stroke-opacity="0.14" stroke-width="2"/>
+  <rect x="0.5" y="0.5" width="799" height="799" rx="16" fill="none" stroke="#000" stroke-opacity="0.5" stroke-width="1"/>
+</svg>

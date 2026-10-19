@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- Stone board, marble or slate: a 40px mitered frame around an 8x8 grid of 90px slabs,
+       light slab in the top-left. Colour slots in double braces come from the style's palette
+       in scripts/generate_assets.py; {{squares}} is drawn there, each slab with its own veins -->
+  <defs>
+    <!-- Cloudy wash inside the stone, in a shade of its veins: soft blotches with
+         clear patches between them -->
+    <filter id="cloud-light" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" seed="7"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.6 0 0 0 -0.62" result="clouds"/>
+      <feFlood flood-color="{{light_cloud}}"/>
+      <feComposite in2="clouds" operator="in"/>
+    </filter>
+    <filter id="cloud-dark" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" seed="13"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.6 0 0 0 -0.62" result="clouds"/>
+      <feFlood flood-color="{{dark_cloud}}"/>
+      <feComposite in2="clouds" operator="in"/>
+    </filter>
+
+    <!-- The soft glow a vein spreads into the stone around it -->
+    <filter id="halo" x="-20%" y="-20%" width="140%" height="140%">
+      <feMorphology operator="dilate" radius="0.8"/>
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+
+    <!-- Fine crystals over everything -->
+    <filter id="crystals" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <!-- Slow mottling for the frame -->
+    <filter id="mottle" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="3" seed="19"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+
+    <!-- Hairline joint between slabs -->
+    <pattern id="joints" x="40" y="40" width="90" height="90" patternUnits="userSpaceOnUse">
+      <path d="M0.5 89 L0.5 0.5 L89 0.5" fill="none" stroke="#fff" stroke-opacity="0.14" stroke-width="1"/>
+      <path d="M89.5 1 L89.5 89.5 L1 89.5" fill="none" stroke="#000" stroke-opacity="0.32" stroke-width="1"/>
+    </pattern>
+
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="{{frame_light}}"/>
+      <stop offset="100%" stop-color="{{frame_dark}}"/>
+    </linearGradient>
+
+    <!-- Polish: a crisp window reflection, stronger than on varnished wood -->
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0.2" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.29" stop-color="#fff" stop-opacity="0.09"/>
+      <stop offset="0.33" stop-color="#fff" stop-opacity="0.02"/>
+      <stop offset="0.37" stop-color="#fff" stop-opacity="0.08"/>
+      <stop offset="0.5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="vignette" cx="45%" cy="40%" r="75%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.25"/>
+    </radialGradient>
+
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <clipPath id="outline">
+      <rect x="0" y="0" width="800" height="800" rx="16"/>
+    </clipPath>
+    <clipPath id="play-area">
+      <rect x="40" y="40" width="720" height="720"/>
+    </clipPath>
+  </defs>
+
+  <!-- Frame: polished stone, each mitered rail facing the light differently -->
+  <g clip-path="url(#outline)">
+    <rect x="0" y="0" width="800" height="800" fill="url(#frame)"/>
+    <rect x="0" y="0" width="800" height="800" filter="url(#mottle)" opacity="0.08"/>
+    <path d="M0 0 H800 L760 40 H40 Z" fill="#fff" opacity="0.07"/>
+    <path d="M0 0 V800 L40 760 V40 Z" fill="#fff" opacity="0.03"/>
+    <path d="M800 0 V800 L760 760 V40 Z" fill="#000" opacity="0.12"/>
+    <path d="M0 800 H800 L760 760 H40 Z" fill="#000" opacity="0.2"/>
+    <path d="M0 0 L40 40 M800 0 L760 40 M0 800 L40 760 M800 800 L760 760" stroke="#000" stroke-opacity="0.35" stroke-width="1"/>
+  </g>
+
+  <!-- A thin metal line set into the frame -->
+  <rect x="31.5" y="31.5" width="737" height="737" fill="none" stroke="{{inlay_dark}}" stroke-width="1"/>
+  <rect x="33" y="33" width="734" height="734" fill="none" stroke="{{inlay}}" stroke-width="2"/>
+
+  <!-- Slabs -->
+  <g>
+    {{squares}}
+  </g>
+  <rect x="0" y="0" width="800" height="800" rx="16" filter="url(#crystals)" opacity="0.05"/>
+
+  <!-- Joints, lighting and the frame's shadow -->
+  <rect x="40" y="40" width="720" height="720" fill="url(#joints)"/>
+  <rect x="40" y="40" width="720" height="720" fill="url(#vignette)"/>
+  <g clip-path="url(#play-area)">
+    <rect x="40" y="40" width="720" height="720" fill="none" stroke="#000" stroke-opacity="0.5" stroke-width="8" filter="url(#soft)"/>
+  </g>
+  <rect x="0" y="0" width="800" height="800" rx="16" fill="url(#sheen)"/>
+
+  <!-- Frame bevels -->
+  <rect x="38.5" y="38.5" width="723" height="723" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="3"/>
+  <rect x="1.5" y="1.5" width="797" height="797" rx="15" fill="none" stroke="#fff" stroke-opacity="0.16" stroke-width="2"/>
+  <rect x="0.5" y="0.5" width="799" height="799" rx="16" fill="none" stroke="#000" stroke-opacity="0.5" stroke-width="1"/>
+</svg>

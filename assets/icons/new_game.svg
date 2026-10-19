@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Generated from assets/templates/icons/new_game.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- New game: a piece inside an arrow that comes round to start again. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M18 2v4h-4"/><circle cx="12" cy="12" r="3"/>
+  </g>
+</svg>

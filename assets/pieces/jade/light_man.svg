@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Generated from assets/templates/pieces/man.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- A man: one disc seen from slightly above, lit from the top-left. Colour slots in double
+       braces come from the piece style's palette in scripts/generate_assets.py; <rect width="100" height="100" filter="url(#cloud)"/><rect width="100" height="100" filter="url(#speckle)" opacity="0.04"/>
+       (the material on the face) and <path d="M88.9 49.7v7M88.6 52.3v7M88.1 55v7M87.4 57.6v7M86.5 60.1v7M85.5 62.6v7M84.2 65v7M82.8 67.3v7M81.2 69.5v7M79.5 71.6v7M77.6 73.5v7M75.5 75.3v7M73.4 77v7M71.1 78.5v7M68.7 79.9v7M66.2 81.1v7M63.6 82.1v7M61 83v7M58.3 83.6v7M55.6 84.1v7M52.8 84.4v7M50 84.5v7M47.2 84.4v7M44.4 84.1v7M41.7 83.6v7M39 83v7M36.4 82.1v7M33.8 81.1v7M31.3 79.9v7M28.9 78.5v7M26.6 77v7M24.5 75.3v7M22.4 73.5v7M20.5 71.6v7M18.8 69.5v7M17.2 67.3v7M15.8 65v7M14.5 62.6v7M13.5 60.1v7M12.6 57.6v7M11.9 55v7M11.4 52.3v7M11.1 49.7v7" stroke="#000" stroke-opacity="0.4" stroke-width="0.7"/><path d="M89 49.7v7M88.7 52.3v7M88.3 55v7M87.6 57.6v7M86.8 60.1v7M85.8 62.6v7M84.6 65v7M83.2 67.3v7M81.6 69.5v7M79.9 71.6v7M78.1 73.5v7M76.1 75.3v7M73.9 77v7M71.7 78.5v7M69.3 79.9v7M66.8 81.1v7M64.3 82.1v7M61.7 83v7M59 83.6v7M56.2 84.1v7M53.5 84.4v7M50.7 84.5v7M47.9 84.4v7M45.1 84.1v7M42.4 83.6v7M39.7 83v7M37 82.1v7M34.4 81.1v7M31.9 79.9v7M29.5 78.5v7M27.2 77v7M25 75.3v7M22.9 73.5v7M21 71.6v7M19.2 69.5v7M17.6 67.3v7M16.1 65v7M14.8 62.6v7M13.7 60.1v7M12.8 57.6v7M12 55v7M11.5 52.3v7M11.1 49.7v7" stroke="#fff" stroke-opacity="0.16" stroke-width="0.6"/> (the ridges around the edge) are drawn there -->
+  <defs>
+    <!-- Top face: brightest where the light hits, darkest at the far rim -->
+    <radialGradient id="face" cx="36%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#e4e6d6"/>
+      <stop offset="100%" stop-color="#c0c7a3"/>
+    </radialGradient>
+
+    <!-- The edge is a short cylinder: lit on the left with a highlight stripe, dark on the right -->
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ced3b6"/>
+      <stop offset="17%" stop-color="#e8eadc"/>
+      <stop offset="40%" stop-color="#ced3b6"/>
+      <stop offset="100%" stop-color="#a3b07d"/>
+    </linearGradient>
+
+    <!-- A raised rim catches light on its top-left and falls into shadow at the bottom-right.
+         Walls cut into the face (the dish, the grooves) are lit the other way round -->
+    <linearGradient id="rim" x1="0.15" y1="0.1" x2="0.85" y2="0.9">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0.15" y1="0.1" x2="0.85" y2="0.9">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.45"/>
+      <stop offset="55%" stop-color="#000" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Light that passes into the stone and comes out on the far side -->
+    <radialGradient id="glow" cx="66%" cy="74%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- The highlight along the rim, fading out at both ends -->
+    <linearGradient id="glint" x1="13" y1="38" x2="60" y2="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Material textures the <rect width="100" height="100" filter="url(#cloud)"/><rect width="100" height="100" filter="url(#speckle)" opacity="0.04"/> slot draws with -->
+    <filter id="speckle" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -2.4 0 0 1.45" result="marks"/>
+      <feFlood flood-color="#000000"/>
+      <feComposite in2="marks" operator="in"/>
+    </filter>
+    <filter id="cloud" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="4" seed="3"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.8 0 0 0 -0.7" result="clouds"/>
+      <feFlood flood-color="#ffffff"/>
+      <feComposite in2="clouds" operator="in"/>
+    </filter>
+    <filter id="flecks" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="11"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  16 0 0 0 -11.3" result="specks"/>
+      <feFlood flood-color="#ffffff"/>
+      <feComposite in2="specks" operator="in"/>
+    </filter>
+    <filter id="halo" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5"/>
+    </filter>
+    <filter id="contact" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.7"/>
+    </filter>
+    <filter id="blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+
+    <clipPath id="face-clip">
+      <ellipse cx="50" cy="47" rx="39" ry="37.5"/>
+    </clipPath>
+  </defs>
+
+  <!-- A wide soft shadow on the board, and a tight dark one where the disc touches it -->
+  <ellipse cx="54" cy="58" rx="41" ry="39" fill="#000" opacity="0.4" filter="url(#shadow)"/>
+  <ellipse cx="51" cy="55" rx="39.5" ry="37.5" fill="#000" opacity="0.55" filter="url(#contact)"/>
+
+  <!-- Edge, its flutes, and a lathe line where the piece is turned instead of fluted -->
+  <path d="M11 47 V54 A39 37.5 0 0 0 89 54 V47 Z" fill="url(#edge)"/>
+  <g opacity="0"><path d="M88.9 49.7v7M88.6 52.3v7M88.1 55v7M87.4 57.6v7M86.5 60.1v7M85.5 62.6v7M84.2 65v7M82.8 67.3v7M81.2 69.5v7M79.5 71.6v7M77.6 73.5v7M75.5 75.3v7M73.4 77v7M71.1 78.5v7M68.7 79.9v7M66.2 81.1v7M63.6 82.1v7M61 83v7M58.3 83.6v7M55.6 84.1v7M52.8 84.4v7M50 84.5v7M47.2 84.4v7M44.4 84.1v7M41.7 83.6v7M39 83v7M36.4 82.1v7M33.8 81.1v7M31.3 79.9v7M28.9 78.5v7M26.6 77v7M24.5 75.3v7M22.4 73.5v7M20.5 71.6v7M18.8 69.5v7M17.2 67.3v7M15.8 65v7M14.5 62.6v7M13.5 60.1v7M12.6 57.6v7M11.9 55v7M11.4 52.3v7M11.1 49.7v7" stroke="#000" stroke-opacity="0.4" stroke-width="0.7"/><path d="M89 49.7v7M88.7 52.3v7M88.3 55v7M87.6 57.6v7M86.8 60.1v7M85.8 62.6v7M84.6 65v7M83.2 67.3v7M81.6 69.5v7M79.9 71.6v7M78.1 73.5v7M76.1 75.3v7M73.9 77v7M71.7 78.5v7M69.3 79.9v7M66.8 81.1v7M64.3 82.1v7M61.7 83v7M59 83.6v7M56.2 84.1v7M53.5 84.4v7M50.7 84.5v7M47.9 84.4v7M45.1 84.1v7M42.4 83.6v7M39.7 83v7M37 82.1v7M34.4 81.1v7M31.9 79.9v7M29.5 78.5v7M27.2 77v7M25 75.3v7M22.9 73.5v7M21 71.6v7M19.2 69.5v7M17.6 67.3v7M16.1 65v7M14.8 62.6v7M13.7 60.1v7M12.8 57.6v7M12 55v7M11.5 52.3v7M11.1 49.7v7" stroke="#fff" stroke-opacity="0.16" stroke-width="0.6"/></g>
+  <path d="M11 50.5 A39 37.5 0 0 0 89 50.5" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="0.7" opacity="0"/>
+
+  <!-- Top face and its material -->
+  <ellipse cx="50" cy="47" rx="39" ry="37.5" fill="url(#face)"/>
+  <g clip-path="url(#face-clip)">
+    <rect width="100" height="100" filter="url(#cloud)"/><rect width="100" height="100" filter="url(#speckle)" opacity="0.04"/>
+    <rect x="0" y="0" width="100" height="100" fill="url(#glow)"/>
+  </g>
+
+  <!-- Raised rim, the dish inside it, and two grooves. Light pieces use softer grooves -->
+  <ellipse cx="50" cy="47" rx="36" ry="34.6" fill="none" stroke="url(#rim)" stroke-width="5"/>
+  <g fill="none" opacity="0.5">
+    <ellipse cx="50" cy="47" rx="33.3" ry="32" stroke="url(#wall)" stroke-width="1.4"/>
+    <ellipse cx="50" cy="47" rx="25" ry="24" stroke="url(#wall)" stroke-width="1.4"/>
+    <ellipse cx="50" cy="47" rx="25" ry="24" stroke="#000" stroke-opacity="0.2" stroke-width="0.5"/>
+    <ellipse cx="50" cy="47" rx="17" ry="16.3" stroke="url(#wall)" stroke-width="1.2"/>
+  </g>
+  <ellipse cx="50" cy="47" rx="38.6" ry="37.1" fill="none" stroke="url(#rim)" stroke-width="0.8"/>
+
+  <!-- Gloss: a sharp highlight along the top-left of the rim and the soft reflection of a window -->
+  <g opacity="0.45">
+    <path d="M13.1 37.5 A38.2 36.7 0 0 1 59.9 11.6" fill="none" stroke="url(#glint)" stroke-width="2" stroke-linecap="round" filter="url(#soft)"/>
+    <g transform="rotate(-33 36 27)" filter="url(#blur)" fill="#fff" opacity="0.55">
+      <rect x="27" y="23" width="8" height="8" rx="2"/>
+      <rect x="36.5" y="23" width="8" height="8" rx="2"/>
+    </g>
+  </g>
+</svg>

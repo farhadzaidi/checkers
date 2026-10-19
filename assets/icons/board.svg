@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Generated from assets/templates/icons/board.svg by scripts/generate_assets.py. Edit the template, not this file -->
+  <!-- Board style: a board of four squares, two of them filled. Icons are drawn in white on a 24px grid with 2px round strokes;
+       the colour slot is filled with white by scripts/generate_assets.py, and the app tints it -->
+  <g fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3.5 3.5H12V12H3.5Z M12 12h8.5v8.5H12Z" fill="#ffffff" stroke="none"/>
+  </g>
+</svg>
