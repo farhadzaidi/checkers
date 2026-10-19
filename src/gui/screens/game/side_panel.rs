@@ -1,6 +1,6 @@
 use super::game_over::{badge, result_text, side_name};
 use super::screen::GameScreen;
-use crate::game::Piece;
+use crate::game::{Piece, Side};
 use crate::gui::assets::{Icon, Sprites};
 use crate::gui::screens::Navigation;
 use crate::gui::settings::Settings;
@@ -74,7 +74,7 @@ impl GameScreen {
                     piece,
                     STATUS_IMAGE_SIZE,
                 );
-                (image, format!("{} to move", side_name(side)))
+                (image, self.turn_text(side))
             }
         };
 
@@ -86,8 +86,31 @@ impl GameScreen {
                 .size(LARGE_TEXT_SIZE)
                 .strong()
                 .color(palette.text);
-            ui.label(headline);
+
+            // A row never wraps its text, so give the headline a column as wide as the space left.
+            // Long messages then wrap onto a second line instead of pushing the card past the panel
+            let width = ui.available_width();
+            ui.vertical(|ui| {
+                ui.set_max_width(width);
+                ui.add(egui::Label::new(headline).wrap());
+            });
         });
+    }
+
+    /// Say whose move it is, or what the computer is doing when it's its move
+    fn turn_text(&self, side: Side) -> String {
+        let Some(opponent) = self.opponent.as_ref().filter(|_| self.is_opponent_turn()) else {
+            return format!("{} to move", side_name(side));
+        };
+
+        if opponent.has_failed() {
+            "The computer couldn't move".to_string()
+        } else if self.session.can_redo() {
+            // Looking back through the game: it only plays again at the end
+            "Redo to replay the computer's move".to_string()
+        } else {
+            "Computer is thinking…".to_string()
+        }
     }
 
     /// Undo and Redo side by side, greyed out when there's nothing to step to, with the keyboard hint below

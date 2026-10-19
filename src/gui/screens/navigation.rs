@@ -4,10 +4,11 @@ use crate::game::{GameSession, Side};
 pub enum Navigation {
     // The new game screen
     NewGame,
-    // A game set up on the new game screen, ready to play
+    // A game set up on the new game screen, ready to play. The computer plays the opponent side, if there is one
     StartGame {
         session: GameSession,
         bottom_side: Side,
+        opponent: Option<Side>,
     },
     // The settings screen, coming back to the current screen afterwards
     Settings,

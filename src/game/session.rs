@@ -115,12 +115,15 @@ impl GameSession {
 
     /// Return how the game ended, or None if it's still going
     pub fn outcome(&self) -> Option<GameOutcome> {
-        let history: Vec<PositionHash> = self.positions[..self.current]
+        game_outcome(&self.current_position(), &self.moves(), &self.history())
+    }
+
+    /// Return the hash of every position before the current one, oldest first, for spotting repetitions
+    pub fn history(&self) -> Vec<PositionHash> {
+        self.positions[..self.current]
             .iter()
             .map(|board| board.hash())
-            .collect();
-
-        game_outcome(&self.current_position(), &self.moves(), &history)
+            .collect()
     }
 }
 
@@ -233,6 +236,23 @@ mod tests {
         session.redo();
         play(&mut session, "21-17");
         assert_eq!(session.last_move().unwrap().to_string(), "21-17");
+    }
+
+    #[test]
+    fn history_holds_earlier_positions_oldest_first() {
+        let mut session = GameSession::new();
+        assert!(session.history().is_empty());
+
+        // After two moves: the start, then the position after the first move. Never the current one
+        let start = session.current_position().hash();
+        play(&mut session, "9-13");
+        let after_first = session.current_position().hash();
+        play(&mut session, "22-18");
+        assert_eq!(session.history(), [start, after_first]);
+
+        // Undo steps back to before the second move, so only the start came before
+        session.undo();
+        assert_eq!(session.history(), [start]);
     }
 
     #[test]

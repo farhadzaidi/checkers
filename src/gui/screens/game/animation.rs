@@ -19,19 +19,35 @@ const SHAKE_DISTANCE: f32 = 0.08;
 /// Red flashed over the square an illegal drop landed on, fading out
 const REJECT_TINT: Color32 = Color32::from_rgba_unmultiplied_const(230, 40, 40, 150);
 
-/// A piece sliding along its route, one hop at a time. For a played move, the pieces it took fade out
+/// A piece sliding along its route, one hop at a time. For a played move, the pieces it took fade out;
+/// for an undone one, it slides back the way it came and they fade back in
 pub struct Slide {
-    // The piece as it was before moving, so a man crowned by the move becomes a king as it lands
+    // The piece as it was before sliding, so a man crowned by the move becomes a king as it lands,
+    // and a king crowned by an undone move turns back into a man
     piece: Piece,
     start: Square,
     // Where the piece was let go, when it was dragged there, instead of its start square
     dropped_at: Option<Pos2>,
     landings: MovePath,
     captured: Vec<(Square, Piece)>,
-    // Where a played move put the piece, left empty while it slides there. None for a hop that isn't played yet
-    pub lands_on: Option<Square>,
+    // Where the piece ends up on the board, left empty while it slides there. None for a hop that isn't played yet
+    lands_on: Option<Square>,
+    // Sliding an undone move back, so the captured pieces fade in rather than out
+    reversed: bool,
     // Set on the first frame that draws it
     started: Option<f64>,
+}
+
+impl Slide {
+    /// Return the squares to leave empty while this slide draws what's on them: where the piece lands,
+    /// and for an undone move, the pieces it took, which are back on the board but fading in
+    pub fn hidden(&self) -> Vec<Square> {
+        let mut hidden: Vec<Square> = self.lands_on.into_iter().collect();
+        if self.reversed {
+            hidden.extend(self.captured.iter().map(|&(square, _)| square));
+        }
+        hidden
+    }
 }
 
 /// An illegal move being shown: the piece shakes, and the square it was dropped on flashes red
@@ -72,6 +88,39 @@ impl GameScreen {
             landings,
             captured,
             lands_on: Some(mv.to()),
+            reversed: false,
+            started: None,
+        });
+    }
+
+    /// Slide a move that was just undone back the way it came, from its final square over its landings
+    /// in reverse to where it started, with the pieces it took fading back in.
+    /// The after position is the one the move led to, before the undo
+    pub(super) fn slide_undone_move(&mut self, after: &Board, mv: Move, path: MovePath) {
+        let before = self.session.current_position();
+        let Some(piece) = after.piece_at(mv.to()) else {
+            return;
+        };
+
+        // Back over each landing but the last, which is where it starts, then home
+        //     6 -> 13 -> 22 undone -> 22 -> 13 -> 6
+        let mut landings: MovePath = path.iter().rev().skip(1).copied().collect();
+        landings.push(mv.from());
+
+        let captured = mv
+            .captured_squares()
+            .into_iter()
+            .filter_map(|square| Some((square, before.piece_at(square)?)))
+            .collect();
+
+        self.slide = Some(Slide {
+            piece,
+            start: mv.to(),
+            dropped_at: None,
+            landings,
+            captured,
+            lands_on: Some(mv.from()),
+            reversed: true,
             started: None,
         });
     }
@@ -95,6 +144,7 @@ impl GameScreen {
             landings,
             captured: Vec::new(),
             lands_on: None,
+            reversed: false,
             started: None,
         });
     }
@@ -142,10 +192,12 @@ impl GameScreen {
         let Some(slide) = &self.slide else {
             return;
         };
+        // Taken pieces fade out as a move plays, and back in as it's undone
         let eased = ease_out(progress);
+        let opacity = if slide.reversed { eased } else { 1.0 - eased };
         for &(square, piece) in &slide.captured {
             let rect = geometry.square_rect(square);
-            board::draw_piece(painter, rect, piece, 1.0 - eased, sprites, settings);
+            board::draw_piece(painter, rect, piece, opacity, sprites, settings);
         }
 
         // The points the piece passes through: its start, then the middle of each square it lands on
@@ -231,4 +283,48 @@ fn progress(ui: &egui::Ui, started: f64, now: f64, seconds: f64) -> Option<f32> 
 /// Start fast and settle gently: 0 at the start, 1 at the end, most of the way there by halfway
 fn ease_out(progress: f32) -> f32 {
     1.0 - (1.0 - progress).powi(3)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::{GameSession, Side};
+
+    /// A two player game from the position, with the move in notation already played
+    fn after_playing(fen: &str, notation: &str) -> GameScreen {
+        let mut session = GameSession::from_fen(fen).unwrap();
+        let mv = Move::from_notation(&session.current_position(), notation).unwrap();
+        session.play(mv);
+        GameScreen::new(session, Side::Black, None)
+    }
+
+    #[test]
+    fn undoing_a_multi_capture_retraces_its_hops() {
+        // 6 jumps to 13 then 22 around the diamond. Counting from 0: 5 -> 12 -> 21, taking 8 and 16
+        let mut screen = after_playing("B:W9,10,17,18:B6", "6x13x22");
+        screen.undo();
+
+        let slide = screen.slide.as_ref().unwrap();
+        assert!(slide.reversed);
+        assert_eq!(slide.start, 21);
+        assert_eq!(slide.landings.as_slice(), &[12, 5]);
+
+        // The taken men are back on the board but hidden, since the slide fades them in
+        let captured: Vec<Square> = slide.captured.iter().map(|&(square, _)| square).collect();
+        assert_eq!(captured, [8, 16]);
+        assert_eq!(slide.hidden(), [5, 8, 16]);
+    }
+
+    #[test]
+    fn undoing_a_crowning_slides_a_king_back_to_a_man() {
+        // The man on 22 jumps 26 and lands on 31, in Black's promotion row, so it's crowned
+        let mut screen = after_playing("B:W26:B22", "22x31");
+        screen.undo();
+
+        // It slides home as the king it became, and the board under it has the man again
+        let slide = screen.slide.as_ref().unwrap();
+        assert_eq!(slide.piece, Piece::BlackKing);
+        let position = screen.session.current_position();
+        assert_eq!(position.piece_at(21), Some(Piece::BlackMan));
+    }
 }

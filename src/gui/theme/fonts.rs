@@ -1,4 +1,4 @@
-use eframe::egui::{self, FontData, FontDefinitions, FontFamily, FontId};
+use eframe::egui::{self, FontData, FontDefinitions, FontFamily, FontId, FontTweak};
 use std::sync::Arc;
 
 /// The fonts, built into the program so they're always there
@@ -19,9 +19,13 @@ pub fn install_fonts(ctx: &egui::Context) {
     fonts
         .font_data
         .insert("lato".into(), Arc::new(FontData::from_static(LATO)));
-    fonts
-        .font_data
-        .insert("serif".into(), Arc::new(FontData::from_static(SERIF)));
+    // Hinting snaps letters to the pixel grid, which keeps small text sharp but turns the curves and
+    // thin strokes of a display serif at title size into stair steps. Titles are big, so leave it off
+    let serif = FontData::from_static(SERIF).tweak(FontTweak {
+        hinting: Some(false),
+        ..FontTweak::default()
+    });
+    fonts.font_data.insert("serif".into(), Arc::new(serif));
 
     // Lato first, with egui's own fonts after it for any character Lato doesn't have
     if let Some(proportional) = fonts.families.get_mut(&FontFamily::Proportional) {

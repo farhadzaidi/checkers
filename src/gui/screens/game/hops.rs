@@ -127,7 +127,8 @@ mod tests {
 
     /// A game in the diamond position with the man on 6 picked up
     fn diamond() -> GameScreen {
-        let mut screen = GameScreen::new(GameSession::from_fen(DIAMOND).unwrap(), Side::Black);
+        let session = GameSession::from_fen(DIAMOND).unwrap();
+        let mut screen = GameScreen::new(session, Side::Black, None);
         screen.selected = Some(START);
         screen
     }
@@ -188,7 +189,7 @@ mod tests {
         let mut session = GameSession::from_fen(WHITE_FIRST).unwrap();
         let white_move = play(&mut session, "32-28");
 
-        let mut screen = GameScreen::new(session, Side::Black);
+        let mut screen = GameScreen::new(session, Side::Black, None);
         screen.selected = Some(START);
         screen.land(LEFT_HOP, None);
         assert!(screen.can_undo());
@@ -207,7 +208,7 @@ mod tests {
         play(&mut session, "6x13x22");
         session.undo();
 
-        let mut screen = GameScreen::new(session, Side::Black);
+        let mut screen = GameScreen::new(session, Side::Black, None);
         assert!(screen.can_redo());
 
         // Starting a capture by hand would be thrown away by a redo, so redo waits

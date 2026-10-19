@@ -114,8 +114,9 @@ impl CheckersApp {
             Navigation::StartGame {
                 session,
                 bottom_side,
+                opponent,
             } => {
-                self.game = Some(GameScreen::new(session, bottom_side));
+                self.game = Some(GameScreen::new(session, bottom_side, opponent));
                 self.screen = Screen::Game;
             }
             Navigation::Back => self.screen = self.back_to,

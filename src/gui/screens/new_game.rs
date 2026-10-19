@@ -32,7 +32,7 @@ pub struct NewGameScreen {
 impl Default for NewGameScreen {
     fn default() -> Self {
         Self {
-            players: Players::Two,
+            players: Players::One,
             side: Side::Black,
             fen: String::new(),
             fen_error: None,
@@ -75,17 +75,16 @@ impl NewGameScreen {
         navigation
     }
 
-    /// One or two players. One player needs the engine, which doesn't exist yet
+    /// One player against the computer, or two players taking turns at this computer
     fn players_choice(&mut self, ui: &mut egui::Ui, sprites: &mut Sprites) {
         let text = palette_of(ui).text;
         widgets::section_label(ui, "Players");
         ui.horizontal(|ui| {
             let one =
                 widgets::icon_image(ui.ctx(), sprites, Icon::OnePlayer, TILE_IMAGE_SIZE, text);
-            ui.add_enabled_ui(false, |ui| {
-                widgets::choice_tile(ui, self.players == Players::One, one, "1 player")
-                    .on_disabled_hover_text("Coming once the engine can play");
-            });
+            if widgets::choice_tile(ui, self.players == Players::One, one, "1 player").clicked() {
+                self.players = Players::One;
+            }
 
             let two =
                 widgets::icon_image(ui.ctx(), sprites, Icon::TwoPlayers, TILE_IMAGE_SIZE, text);
@@ -145,9 +144,15 @@ impl NewGameScreen {
         match session {
             Ok(session) => {
                 self.fen_error = None;
+                // With one player, the computer takes the side they didn't pick
+                let opponent = match self.players {
+                    Players::One => Some(self.side.opposite()),
+                    Players::Two => None,
+                };
                 Some(Navigation::StartGame {
                     session,
                     bottom_side: self.side,
+                    opponent,
                 })
             }
             Err(error) => {

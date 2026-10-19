@@ -1,5 +1,6 @@
 use super::animation::{Rejection, Slide};
 use super::board::{self, BoardGeometry};
+use super::opponent::Opponent;
 use super::side_panel::{PANEL_MARGIN, SIDE_PANEL_WIDTH};
 use crate::game::{GameSession, Move, MovePath, Piece, Side, Square};
 use crate::gui::assets::{Overlay, Sprites};
@@ -27,11 +28,13 @@ pub struct GameScreen {
     pub(super) slide: Option<Slide>,
     // A move just ended the game, so its popup should show. Stepping through the moves later doesn't bring it back
     pub(super) result_pending: bool,
+    // The computer, in a one player game
+    pub(super) opponent: Option<Opponent>,
 }
 
 impl GameScreen {
-    /// Show a game with the given side at the bottom of the board
-    pub fn new(session: GameSession, bottom_side: Side) -> Self {
+    /// Show a game with the given side at the bottom of the board, against the computer if it plays a side
+    pub fn new(session: GameSession, bottom_side: Side, opponent: Option<Side>) -> Self {
         // A position loaded from a FEN can already be over, so say so straight away
         let result_pending = session.outcome().is_some();
         Self {
@@ -43,6 +46,7 @@ impl GameScreen {
             rejection: None,
             slide: None,
             result_pending,
+            opponent: opponent.map(Opponent::new),
         }
     }
 
@@ -54,6 +58,7 @@ impl GameScreen {
         settings: &Settings,
     ) -> Option<Navigation> {
         self.handle_keys(ui);
+        self.let_opponent_move(ui.ctx());
 
         // Panels must be added before the central panel, which takes the remaining space
         let mut navigation = egui::Panel::left("controls")
@@ -81,15 +86,24 @@ impl GameScreen {
         self.is_mid_capture() || self.session.can_undo()
     }
 
-    /// Take back the last hop of a capture in progress, or else the last move.
+    /// Take back the last hop of a capture in progress, or else the last move, sliding it back the way it came.
     /// Hops are only shown, never played, so stepping one back leaves the game alone
     pub(super) fn undo(&mut self) {
         if self.is_mid_capture() {
             self.step_back_hop();
-        } else if self.session.can_undo() {
-            self.session.undo();
-            self.clear_interaction();
+            return;
         }
+
+        // The move and its route have to be read before it's undone
+        let after = self.session.current_position();
+        let Some(undone) = self.session.last_move().zip(self.session.last_move_path()) else {
+            return;
+        };
+
+        self.session.undo();
+        self.clear_interaction();
+        let (mv, path) = undone;
+        self.slide_undone_move(&after, mv, path);
     }
 
     /// Return true if there's an undone move to replay. Not during a capture, which redo would throw away
@@ -141,6 +155,34 @@ impl GameScreen {
         self.rejection = None;
         self.slide = None;
         self.result_pending = false;
+        if let Some(opponent) = &mut self.opponent {
+            opponent.cancel();
+        }
+    }
+
+    /// Return true if it's the computer's side to move. The player can't move its pieces
+    pub(super) fn is_opponent_turn(&self) -> bool {
+        let to_move = self.session.current_position().side_to_move();
+        self.opponent
+            .as_ref()
+            .is_some_and(|opponent| opponent.side() == to_move)
+    }
+
+    /// Let the computer think on its move, and play its move once ready, sliding it like any other.
+    /// It only plays at the end of the game's history: after an undo, there's a redo to go back to instead.
+    /// It waits for the last move to finish sliding, so its reply doesn't cut the animation short
+    fn let_opponent_move(&mut self, ctx: &egui::Context) {
+        if self.session.can_redo() || self.slide.is_some() {
+            return;
+        }
+        let Some(opponent) = &mut self.opponent else {
+            return;
+        };
+
+        if let Some(mv) = opponent.update(&self.session, ctx) {
+            let route = self.session.move_path(mv);
+            self.play(mv, mv.from(), route, None);
+        }
     }
 
     /// Return true if the piece on this square has a legal move
@@ -168,9 +210,12 @@ impl GameScreen {
             return;
         }
 
+        // The computer's pieces only move when it plays them
         let now = ui.input(|input| input.time);
-        self.handle_pointer(&response, &geometry, now);
-        self.set_cursor(ui, &response, &geometry);
+        if !self.is_opponent_turn() {
+            self.handle_pointer(&response, &geometry, now);
+            self.set_cursor(ui, &response, &geometry);
+        }
         self.draw(ui, &painter, &geometry, sprites, settings, now);
     }
 
@@ -201,15 +246,17 @@ impl GameScreen {
         // The dragged, shaking, sliding or hopping piece is drawn on its own below, so leave it out here
         let position = self.session.current_position();
         let mid_capture_start = self.selected.filter(|_| self.is_mid_capture());
-        let hidden: Vec<Square> = [
+        let mut hidden: Vec<Square> = [
             self.dragging,
             self.rejection.as_ref().map(|rejection| rejection.piece),
-            self.slide.as_ref().and_then(|slide| slide.lands_on),
             mid_capture_start,
         ]
         .into_iter()
         .flatten()
         .collect();
+        if let Some(slide) = &self.slide {
+            hidden.extend(slide.hidden());
+        }
         board::draw_pieces(painter, geometry, &position, &hidden, sprites, settings);
 
         if let Some(progress) = slide_progress {
